@@ -28,15 +28,6 @@ namespace models
 		Field& unique(bool);
 	};
 
-	class BigIntegerField : public Field
-	{
-		signed long long __default;
-
-	public:
-		signed long long returnObj;
-		BigIntegerField& default(signed long long);
-	};
-
 	class BooleanField : public Field
 	{
 		bool __default;
@@ -44,6 +35,10 @@ namespace models
 	public:
 		bool returnObj;
 		BooleanField& default(bool);
+		BooleanField(bool def)
+		{
+			__default = def;
+		}
 	};
 
 	class CharField : public Field
@@ -55,6 +50,10 @@ namespace models
 		string returnObj;
 		CharField& default(string);
 		CharField& max_length(int);
+		CharField(string def)
+		{
+			__default = def;
+		}
 	};
 
 	class FloatField : public Field
@@ -64,6 +63,10 @@ namespace models
 	public:
 		float returnObj;
 		FloatField& default(float);
+		FloatField(float def)
+		{
+			__default = def;
+		}
 	};
 
 	class IntegerField : public Field
@@ -73,42 +76,10 @@ namespace models
 	public:
 		int returnObj;
 		IntegerField& default(int);
-	};
-
-	class PositiveIntegerField : public Field
-	{
-		unsigned int __default;
-
-	public:
-		unsigned int returnObj;
-		PositiveIntegerField& default(unsigned int);
-	};
-
-	class PositiveSmallIntegerField : public Field
-	{
-		unsigned short int __default;
-
-	public:
-		unsigned short int returnObj;
-		PositiveSmallIntegerField& default(unsigned short int);
-	};
-
-	class SmallIntegerField : public Field
-	{
-		short int __default;
-
-	public:
-		short int returnObj;
-		SmallIntegerField& default(short int);
-	};
-
-	class TextField : public Field
-	{
-		string __default;
-
-	public:
-		string returnObj;
-		TextField& default(string);
+		IntegerField(int def)
+		{
+			__default = def;
+		}
 	};
 
 	class ForeignKey : public Field
