@@ -5,6 +5,18 @@
 
 namespace models
 {
+	/** Classe responsável por modelar colunas da tabela.
+		Sua construção funciona como no exemplo abaixo:
+
+		Field* salario;
+		Field* id;
+
+		constructor()
+		{
+			salario = new FloatField().default(12.4).null(True).unique();
+			id = new IntegerField().primary_key();
+		}
+	*/
 	class Field
 	{
 	protected:
@@ -28,6 +40,9 @@ namespace models
 		Field& unique(bool);
 	};
 
+	/** Para campos booleanos (TRUE-FALSE) 
+		ENUM('TRUE', 'FALSE') 
+		*/
 	class BooleanField : public Field
 	{
 		bool __default;
@@ -35,12 +50,12 @@ namespace models
 	public:
 		bool returnObj;
 		BooleanField& default(bool);
-		BooleanField(bool def)
-		{
-			__default = def;
-		}
 	};
 
+	/** Para campos de texto.
+		max_length é necessário para a construção deste campo. 
+		VARCHAR(max_length)
+		*/
 	class CharField : public Field
 	{
 		string __default;
@@ -50,38 +65,38 @@ namespace models
 		string returnObj;
 		CharField& default(string);
 		CharField& max_length(int);
-		CharField(string def)
-		{
-			__default = def;
-		}
 	};
 
+	/** Para campos de números reais. 
+		FLOAT(size, d)
+		*/
 	class FloatField : public Field
 	{
 		float __default;
 
 	public:
 		float returnObj;
+		FloatField& size(int);
+		FloatField& d(int);
 		FloatField& default(float);
-		FloatField(float def)
-		{
-			__default = def;
-		}
 	};
 
+	/** Para campos de números inteiros.
+		INT(size)
+		*/
 	class IntegerField : public Field
 	{
 		int __default;
 
 	public:
 		int returnObj;
+		IntegerField& size(int);
 		IntegerField& default(int);
-		IntegerField(int def)
-		{
-			__default = def;
-		}
 	};
 
+	/** Para telacionamentos N-1.
+		O SQL gerado varia de acordo com o Model referenciado, associando com a PK definida.
+		*/
 	class ForeignKey : public Field
 	{
 		string __related_name;
@@ -95,6 +110,9 @@ namespace models
 		ForeignKey& on_delete(string);
 	};
 
+	/** Para relacionamentos N-N.
+		Uma tabela intermediária será gerada, com os campos necessários para relacioná-las.
+		*/
 	class ManyToManyField : public Field
 	{
 		string __related_name;
@@ -112,6 +130,9 @@ namespace models
 		ManyToManyField& db_table(string);
 	};
 
+	/** Para relacionamentos 1-1.
+		A SQL gerada dependerá da chave primária da tabela relacionada.
+		*/
 	class OneToOneField : public Field
 	{
 		string __related_name;
