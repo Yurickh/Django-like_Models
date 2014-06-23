@@ -25,25 +25,29 @@ In order to create a table, you must:
 
 2. Create the columns as models.Field:
 
+    ```c++
     class ExampleModel :: public models.Model
     {
-    models.Field* id;
-    models.Field* income;
+        models.Field* id;
+        models.Field* income;
     };
+    ```
     
 3. Initialize each models.Field with its respective constraints:
 
+    ```c++
     class ExampleModel :: public models.Model
     {
-    models.Field* id;
-    models.Field* income;
+        models.Field* id;
+        models.Field* income;
 
-    ExampleModel()
-    {
-    id = new models.IntegerField().primary_key();
-    income = new models.FloatField().default(12.4).null(True);
-    }
+        ExampleModel()
+        {
+            id = new models.IntegerField().primary_key();
+            income = new models.FloatField().default(12.4).null(True);
+        }
     };
+    ```
 
 ### DROP TABLE
 
@@ -53,8 +57,10 @@ To drop a table, you have two options:
 
 Use the DROP() static method:
 
-    ExampleModel::DROP();
-
+```c++
+ExampleModel::DROP();
+```
+    
 2. Normal drop
 
 Just delete de model declaration.
@@ -63,7 +69,9 @@ Just delete de model declaration.
 
 To retrieve a set of data, use the .filter() method. e.g.:
 
-    models.Model* m;
-    list<models.QuerySet> ret;
+```c++
+models.Model* m;
+list<models.QuerySet> ret;
 
-    m = new ExampleModel;
+m = new ExampleModel;
+```
