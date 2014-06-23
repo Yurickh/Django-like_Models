@@ -27,22 +27,22 @@ In order to create a table, you must:
 
     `class ExampleModel :: public models.Model
     {
-        models.Field* id;
-        models.Field* income;
+      models.Field* id;
+      models.Field* income;
     };`
     
 3. Initialize each models.Field with its respective constraints:
 
     `class ExampleModel :: public models.Model
     {
-        models.Field* id;
-        models.Field* income;
+      models.Field* id;
+      models.Field* income;
 
-        ExampleModel()
-        {
-            id = new models.IntegerField().primary_key();
-            income = new models.FloatField().default(12.4).null(True);
-        }
+      ExampleModel()
+      {
+       id = new models.IntegerField().primary_key();
+       income = new models.FloatField().default(12.4).null(True);
+      }
     };`
 
 ### DROP TABLE
