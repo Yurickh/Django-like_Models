@@ -6,6 +6,9 @@
 
 namespace models
 {
+
+////////////////////FIELDS////////////////////////////////
+
 	/** Classe responsável por modelar colunas da tabela.
 	*/
 	class Field
@@ -137,10 +140,8 @@ namespace models
 		OneToOneField& on_delete(string);
 	};
 
-	/** Classe responsável por modelar tabelas.
-		Sua construção funciona como no exemplo abaixo:
+//////////////////////////QUERYSET///////////////////////////////////////
 
-		
 }
 
 // .default
