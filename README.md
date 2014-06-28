@@ -80,8 +80,6 @@ To retrieve a set of data, use the .filter() method. e.g.:
                 // STL map<string, int> with key => value.
     ```
 
-`ret` is now a list of 
-
 To retrieve a single instance of data, it's better to use the .get() method. e.g.:
 
     ```c++
