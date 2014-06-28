@@ -69,73 +69,73 @@ Just delete de model declaration.
 
 To retrieve a set of data, use the .filter() method. e.g.:
 
-    ```c++
-    models.Model* m;
-    models.QuerySet* n;
+```c++
+models.Model* m;
+models.QuerySet* n;
 
-    m = new ExampleModel;
-    n = m->filter("income",'>', 10);
+m = new ExampleModel;
+n = m->filter("income",'>', 10);
 
-    n.objects(); // in this case, returns a STL list with a
-                // STL map<string, int> with key => value.
-    ```
+n.objects(); // in this case, returns a STL list with a
+            // STL map<string, int> with key => value.
+```
 
 To retrieve a single instance of data, it's better to use the .get() method. e.g.:
 
-    ```c++
-    models.Model* m;
-    models.QuerySet* n;
+```c++
+models.Model* m;
+models.QuerySet* n;
 
-    m = new ExampleModel;
-    n = m->get("id", '=', 5);
+m = new ExampleModel;
+n = m->get("id", '=', 5);
 
-    n.objects(); // in this case, returns a single 
-                //  STL map<string, int> with key => value
-    ```
+n.objects(); // in this case, returns a single 
+            //  STL map<string, int> with key => value
+```
 
 ### INSERT data
 
 To insert new data in a table, do as follows:
 
-    ```c++
-    models.Model* m;
+```c++
+models.Model* m;
 
-    m = new ExampleModel;
+m = new ExampleModel;
 
-    m.set("income", 10000);
-    m.set("id", 7);
+m.set("income", 10000);
+m.set("id", 7);
 
-    m.save();
-    ```
+m.save();
+```
 
 ### UPDATE data
 
 To update a data, you must retrieve it first:
 
-    ```c++
-    models.Model* m;
-    models.QuerySet* n;
+```c++
+models.Model* m;
+models.QuerySet* n;
 
-    m = new ExampleModel;
-    n = m->get("id", '=', 7);
+m = new ExampleModel;
+n = m->get("id", '=', 7);
 
-    n.set("income", 20);
+n.set("income", 20);
 
-    n.save();
-    ```
+n.save();
+```
 
 ### DELETE data
 
 Like an update, you must retrieve the data first:
 
-    ```c++
-    models.Model* m;
-    models.QuerySet* n;
+```c++
+models.Model* m;
+models.QuerySet* n;
 
-    m = new ExampleModel;
-    n = m->get("id", '=', 7);
+m = new ExampleModel;
+n = m->get("id", '=', 7);
 
-    n.delete();
+n.delete();
 
-    n.save();
-    ```
+n.save();
+```
