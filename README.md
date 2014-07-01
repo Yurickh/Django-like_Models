@@ -60,12 +60,18 @@ To retrieve a set of data, use the .filter() method. e.g.:
 ```c++
 models.Model* m;
 models.QuerySet* n;
+models.ReturnSet* ret;
 
 m = new ExampleModel;
-n = m->filter("income",'>', 10);
+n = m->filter("income__gt", 10); // selects entries that have income > 10
 
-n.objects(); // in this case, returns a STL list with a
-            // STL map<string, int> with key => value.
+ret = n->objects(); // in this case, returns a STL list 
+                   // with a STL map<string, int> defined by 
+                  // column_name => column_value.
+
+// Shall print the ID of all entries returned.
+for(DLCPP_LIST::iterator i = ret->begin(); i != ret->end(); ++i)
+    cout << *i["id"];
 ```
 
 To retrieve a single instance of data, it's better to use the .get() method. e.g.:
@@ -73,12 +79,16 @@ To retrieve a single instance of data, it's better to use the .get() method. e.g
 ```c++
 models.Model* m;
 models.QuerySet* n;
+models.ReturnSet* ret;
 
 m = new ExampleModel;
-n = m->get("id", '=', 5);
+n = m->get("id", 5);
 
-n.objects(); // in this case, returns a single 
-            //  STL map<string, int> with key => value
+ret = n->objects(); // in this case, returns a single
+                   //  STL map<string, int> 
+                  // defined by column_name => column_value.
+
+ret["id"] // shall return 5
 ```
 
 ### INSERT data
