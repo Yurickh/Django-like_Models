@@ -19,20 +19,20 @@ For now, the only programmer responsible for the project is Yurick Hauschild, gr
 
 In order to create a table, you must:
 
-1. Create a subclass of models.Model, as follows:
+1. Create a subclass of models::Model, as follows:
 
-    `class ExampleModel :: public models.Model;`
+    `class ExampleModel :: public models::Model;`
 
-2. Create the columns as models.Field:
+2. Create the columns as models::Field:
 
 
     ```c++
-    class ExampleModel :: public models.Model
+    class ExampleModel :: public models::Model
     {
         ExampleModel()
         {
-            column["id"] = new models.IntegerField().primary_key();
-            column["income"] = new models.FloatField().default(12.4).null(True);
+            column["id"] = new models::IntegerField().primary_key();
+            column["income"] = new models::FloatField().standard(12.4).null(True);
         }
     };
     ```
@@ -58,8 +58,8 @@ Just delete de model declaration.
 To retrieve a set of data, use the .filter() method. e.g.:
 
 ```c++
-models.Model* m;
-models.QuerySet* ret;
+models::Model* m;
+models::QuerySet* ret;
 
 m = new ExampleModel;
 ret = m->filter("income__gt", 10); // selects entries that have income > 10
@@ -76,8 +76,8 @@ for(DLCPP_LIST::iterator i = ret->begin(); i != ret->end(); ++i)
 To retrieve a single instance of data, it's better to use the .get() method. e.g.:
 
 ```c++
-models.Model* m;
-models.QuerySet* ret;
+models::Model* m;
+models::QuerySet* ret;
 
 m = new ExampleModel;
 ret = m->get("id__eq", 5);
@@ -94,11 +94,11 @@ ret["id"] // shall return 5
 To insert new data in a table, do as follows:
 
 ```c++
-models.Model* m;
-models.QuerySet* n;
+models::Model* m;
+models::QuerySet* n;
 
 m = new ExampleModel;
-n = m->new();
+n = m->insert1();
 
 n.set("income", 10000);
 n.set("id", 7);
@@ -111,8 +111,8 @@ n.save();
 To update a data, you must retrieve it first:
 
 ```c++
-models.Model* m;
-models.QuerySet* n;
+models::Model* m;
+models::QuerySet* n;
 
 m = new ExampleModel;
 n = m->get("id__eq", 7);
@@ -127,13 +127,13 @@ n.save();
 Like an update, you must retrieve the data first:
 
 ```c++
-models.Model* m;
-models.QuerySet* n;
+models::Model* m;
+models::QuerySet* n;
 
 m = new ExampleModel;
 n = m->get("id__eq", 7);
 
-n->delete();
+n->remove();
 
 n.save();
 ```

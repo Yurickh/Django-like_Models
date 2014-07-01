@@ -6,14 +6,14 @@
 #include <list>
 #include <map>
 #include <string>
-#include <sstring>
+#include <sstream>
 #include <sqlite3.h>
 
-#define DLCPP_LIST(x) 	std::list<std::map<string, x>>
-#define DLCPP_MAP(x)	std::map<string, x>
+#define DLCPP_LIST(x) 	std::list<std::map<std::string, x> >
+#define DLCPP_MAP(x)	std::map<std::string, x>
 
-#define DLCPP_LIST_ITER std::list<std::map<string, value_type>>
-#define DLCPP_MAP_ITER  std::map<string, value_type>::iterator
+#define DLCPP_LIST_ITER(x) std::list<std::map<std::string, x> >
+#define DLCPP_MAP_ITER(x)  std::map<std::string, x>::iterator
 
 namespace models
 {
@@ -27,35 +27,41 @@ namespace models
 	class QuerySet
 	{
     private:
-        stringstream SQLquery;
+        std::stringstream SQLquery;
+        std::string database;
+        std::string table_name;
+        std::string pk_field;
+        std::string pk_value;
 
     public:
-        void set(string column, bool    content);
-        void set(string column, string  content);
-        void set(string column, float   content);
-        void set(string column, int     content);
-        void set(string column, Model&  content);
+        QuerySet();
 
-        void delete(void);
+        void set(std::string column, bool           content);
+        void set(std::string column, std::string    content);
+        void set(std::string column, float          content);
+        void set(std::string column, int            content);
+        void set(std::string column, QuerySet&      content);
+
+        void remove(void);
 	};
 
 	template<typename value_type>
 	class SingleSet : protected QuerySet
 	{
 	private:
-		DLCPP_MAP(value_type) value;
+		typename DLCPP_MAP(value_type) value;
 
 	public:
 		//OPERATORS
-		value_type                operator[](const string& index);
+		value_type                operator[](const std::string& index);
 		SingleSet<value_type>&    operator=(const SingleSet<value_type>& x);
-		SingleSet<value_type>&    operator=(const DLCPP_MAP(value_type)& x);
+		SingleSet<value_type>&    operator=(const typename DLCPP_MAP(value_type)& x);
 
 		//ITERATORS
-		DLCPP_MAP_ITER begin(void);
-		DLCPP_MAP_ITER end(void);
-		DLCPP_MAP_ITER rbegin(void);
-		DLCPP_MAP_ITER rend(void);
+		typename DLCPP_MAP_ITER(value_type) begin(void);
+		typename DLCPP_MAP_ITER(value_type) end(void);
+		typename DLCPP_MAP_ITER(value_type) rbegin(void);
+		typename DLCPP_MAP_ITER(value_type) rend(void);
 
 		//CAPACITY
 		bool 			empty(void)     const;
@@ -63,23 +69,23 @@ namespace models
 		unsigned int 	max_size(void)  const;
 
 		//INSERT
-		pair<DLCPP_MAP_ITER, value_type> insert(const value_type& val);
-		DLCPP_MAP_ITER                   insert(DLCPP_MAP_ITER pos, const value_type& val);
+		std::pair<typename DLCPP_MAP_ITER(value_type), value_type> insert(const value_type& val);
+		typename DLCPP_MAP_ITER(value_type)                   insert(typename DLCPP_MAP_ITER(value_type) pos, const value_type& val);
 		// range insert is not currently supported
 
 		//ERASE
-		void 			erase(DLCPP_MAP_ITER pos);
-		unsigned int 	erase(const string& k);
-		void			erase(DLCPP_MAP_ITER first, DLCPP_MAP_ITER last);
+		void 			erase(typename DLCPP_MAP_ITER(value_type) pos);
+		unsigned int 	erase(const std::string& k);
+		void			erase(typename DLCPP_MAP_ITER(value_type) first, typename DLCPP_MAP_ITER(value_type) last);
 		void 			clear(void);
 
 		// Observers not currently supported
 
 		//OPERATIONS
-		DLCPP_MAP_ITER			find(const string& k);
-		unsigned int 			count(const string& k) const;
-		DLCPP_MAP_ITER			lower_bound(const string& k);
-		DLCPP_MAP_ITER			upper_bound(const string& k);
+		typename DLCPP_MAP_ITER(value_type)			find(const std::string& k);
+		unsigned int 			count(const std::string& k) const;
+		typename DLCPP_MAP_ITER(value_type)			lower_bound(const std::string& k);
+		typename DLCPP_MAP_ITER(value_type)			upper_bound(const std::string& k);
 		// equal_range not currently supported
 
 		// get_allocator not currently supported
@@ -97,10 +103,10 @@ namespace models
         MultipleSet<value_type>&    operator=(const DLCPP_LIST(value_type)& x);
 
         //ITERATORS
-        DLCPP_LIST_ITER    begin(void);
-        DLCPP_LIST_ITER    end(void);
-        DLCPP_LIST_ITER    rbegin(void);
-        DLCPP_LIST_ITER    rend(void);
+        DLCPP_LIST_ITER(value_type)    begin(void);
+        DLCPP_LIST_ITER(value_type)    end(void);
+        DLCPP_LIST_ITER(value_type)    rbegin(void);
+        DLCPP_LIST_ITER(value_type)    rend(void);
 
         //CAPACITY
         bool            empty(void)     const;
@@ -118,19 +124,19 @@ namespace models
         void pop_back(void);
 
         //INSERT
-        DLCPP_LIST_ITER insert(DLCPP_LIST_ITER position, const value_type& val);
-        void            insert(DLCPP_LIST_ITER position, unsigned int n, const value_type& val);
+        DLCPP_LIST_ITER(value_type) insert(DLCPP_LIST_ITER(value_type) position, const value_type& val);
+        void            insert(DLCPP_LIST_ITER(value_type) position, unsigned int n, const value_type& val);
         //range insert not currently supported
 
         //ERASE
-        DLCPP_LIST_ITER erase(DLCPP_LIST_ITER position);
-        DLCPP_LIST_ITER erase(DLCPP_LIST_ITER first, DLCPP_LIST_ITER last);
+        DLCPP_LIST_ITER(value_type) erase(DLCPP_LIST_ITER(value_type) position);
+        DLCPP_LIST_ITER(value_type) erase(DLCPP_LIST_ITER(value_type) first, DLCPP_LIST_ITER(value_type) last);
         void            clear(void);
 
         //OPERATIONS
-        void splice(DLCPP_LIST_ITER position, DLCPP_LIST(value_type)& x);
-        void splice(DLCPP_LIST_ITER position, DLCPP_LIST(value_type)& x, DLCPP_LIST_ITER i);
-        void splice(DLCPP_LIST_ITER position, DLCPP_LIST(value_type)& x, DLCPP_LIST_ITER first, DLCPP_LIST_ITER last);
+        void splice(DLCPP_LIST_ITER(value_type) position, DLCPP_LIST(value_type)& x);
+        void splice(DLCPP_LIST_ITER(value_type) position, DLCPP_LIST(value_type)& x, DLCPP_LIST_ITER(value_type) i);
+        void splice(DLCPP_LIST_ITER(value_type) position, DLCPP_LIST(value_type)& x, DLCPP_LIST_ITER(value_type) first, DLCPP_LIST_ITER(value_type) last);
         void remove(const value_type& val);
         void merge(DLCPP_LIST(value_type)& x);
         void sort(void);
@@ -147,21 +153,21 @@ namespace models
 	class Field
 	{
 	protected:
-		bool __null;
+		bool __notNull;
 		bool __blank;
-		std::list<std::list<string>> __choices;
-		string __db_column;
+		std::list<std::list< std::string> > __choices;
+		std::string __db_column;
 		bool __db_index;
 		bool __primary_key;
 		bool __unique;
 
 	public:
-		string sql;
+		std::string sql;
 
 		Field& null(bool null);
 		Field& blank(bool blank);
-		Field& choices(const &std::list<std::list<string>>);
-		Field& db_column(string);
+		Field& choices(const std::map<std::string, std::string>&);
+		Field& db_column(std::string);
 		Field& db_index(bool);
 		Field& primary_key(bool);
 		Field& unique(bool);
@@ -172,11 +178,11 @@ namespace models
 		*/
 	class BooleanField : public Field
 	{
-		bool __default;
+		bool __standard;
 
 	public:
 		bool returnObj;
-		BooleanField& default(bool);
+		BooleanField& standard(bool);
 	};
 
 	/** Para campos de texto.
@@ -185,12 +191,12 @@ namespace models
 		*/
 	class CharField : public Field
 	{
-		string __default;
+		std::string __standard;
 		int __max_length;
 
 	public:
-		string returnObj;
-		CharField& default(string);
+		std::string returnObj;
+		CharField& standard(std::string);
 		CharField& max_length(int);
 	};
 
@@ -199,13 +205,13 @@ namespace models
 		*/
 	class FloatField : public Field
 	{
-		float __default;
+		float __standard;
 
 	public:
 		float returnObj;
 		FloatField& size(int);
 		FloatField& d(int);
-		FloatField& default(float);
+		FloatField& standard(float);
 	};
 
 	/** Para campos de números inteiros.
@@ -213,12 +219,12 @@ namespace models
 		*/
 	class IntegerField : public Field
 	{
-		int __default;
+		int __standard;
 
 	public:
 		int returnObj;
 		IntegerField& size(int);
-		IntegerField& default(int);
+		IntegerField& standard(int);
 	};
 
 	/** Para telacionamentos N-1.
@@ -226,15 +232,15 @@ namespace models
 		*/
 	class ForeignKey : public Field
 	{
-		string __related_name;
+		std::string __related_name;
 		Field& __to_field;
-		string __on_delete;
+		std::string __on_delete;
 
 	public:
-		ForeignKey(const &Model);
-		ForeignKey& related_name(string);
-		ForeignKey& to_field(const &Field);
-		ForeignKey& on_delete(string);
+		ForeignKey(const Model&);
+		ForeignKey& related_name(std::string);
+		ForeignKey& to_field(const Field&);
+		ForeignKey& on_delete(std::string);
 	};
 
 	/** Para relacionamentos N-N.
@@ -242,19 +248,19 @@ namespace models
 		*/
 	class ManyToManyField : public Field
 	{
-		string __related_name;
+		std::string __related_name;
 		bool __symmetrical;
-		Model& __through;
-		Field& __through_field[2];
-		string __db_table;
+		Model* __through;
+		Field* __through_field[2];
+		std::string __db_table;
 
 	public:
-		ManyToManyField(const &Model);
-		ManyToManyField& related_name(string);
+		ManyToManyField(const Model&);
+		ManyToManyField& related_name(std::string);
 		ManyToManyField& symmetrical(bool);
-		ManyToManyField& through(const &Model);
+		ManyToManyField& through(const Model&);
 		ManyToManyField& through_field(const Field&, const Field&);
-		ManyToManyField& db_table(string);
+		ManyToManyField& db_table(std::string);
 	};
 
 	/** Para relacionamentos 1-1.
@@ -262,15 +268,15 @@ namespace models
 		*/
 	class OneToOneField : public Field
 	{
-		string __related_name;
+		std::string __related_name;
 		Field& __to_field;
-		string __on_delete;
+		std::string __on_delete;
 
 	public:
-		OneToOneField(const &Model);
-		OneToOneField& related_name(string);
-		OneToOneField& to_field(const &Field);
-		OneToOneField& on_delete(string);
+		OneToOneField(const Model&);
+		OneToOneField& related_name(std::string);
+		OneToOneField& to_field(const Field&);
+		OneToOneField& on_delete(std::string);
 	};
 
 ////////////////////MODELS////////////////////////////////
@@ -283,17 +289,17 @@ namespace models
     public:
         static void DROP(void);
 
-        QuerySet* filter(stringstream requestr, bool);
-        QuerySet* filter(stringstream requestr, string);
-        QuerySet* filter(stringstream requestr, float);
-        QuerySet* filter(stringstream requestr, int);
+        QuerySet* filter(std::stringstream requestr, bool);
+        QuerySet* filter(std::stringstream requestr, std::string);
+        QuerySet* filter(std::stringstream requestr, float);
+        QuerySet* filter(std::stringstream requestr, int);
 
-        QuerySet* get(stringstream requestr, bool);
-        QuerySet* get(stringstream requestr, string);
-        QuerySet* get(stringstream requestr, float);
-        QuerySet* get(stringstream requestr, int);
+        QuerySet* get(std::stringstream requestr, bool);
+        QuerySet* get(std::stringstream requestr, std::string);
+        QuerySet* get(std::stringstream requestr, float);
+        QuerySet* get(std::stringstream requestr, int);
 
-        QuerySet* new(void);
+        QuerySet* insert(void);
     };
 
 }
