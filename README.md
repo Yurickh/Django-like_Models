@@ -59,15 +59,14 @@ To retrieve a set of data, use the .filter() method. e.g.:
 
 ```c++
 models.Model* m;
-models.QuerySet* n;
-models.ReturnSet* ret;
+models.QuerySet* ret;
 
 m = new ExampleModel;
-n = m->filter("income__gt", 10); // selects entries that have income > 10
+ret = m->filter("income__gt", 10); // selects entries that have income > 10
 
-ret = n->objects(); // in this case, returns a STL list 
-                   // with a STL map<string, int> defined by 
-                  // column_name => column_value.
+// in this case, returns a STL list 
+// with a STL map<string, int> defined by 
+// column_name => column_value.
 
 // Shall print the ID of all entries returned.
 for(DLCPP_LIST::iterator i = ret->begin(); i != ret->end(); ++i)
@@ -78,15 +77,14 @@ To retrieve a single instance of data, it's better to use the .get() method. e.g
 
 ```c++
 models.Model* m;
-models.QuerySet* n;
-models.ReturnSet* ret;
+models.QuerySet* ret;
 
 m = new ExampleModel;
-n = m->get("id", 5);
+ret = m->get("id__eq", 5);
 
-ret = n->objects(); // in this case, returns a single
-                   //  STL map<string, int> 
-                  // defined by column_name => column_value.
+// in this case, returns a single
+// STL map<string, int> 
+// defined by column_name => column_value.
 
 ret["id"] // shall return 5
 ```
@@ -97,13 +95,15 @@ To insert new data in a table, do as follows:
 
 ```c++
 models.Model* m;
+models.QuerySet* n;
 
 m = new ExampleModel;
+n = m->new();
 
-m.set("income", 10000);
-m.set("id", 7);
+n.set("income", 10000);
+n.set("id", 7);
 
-m.save();
+n.save();
 ```
 
 ### UPDATE data
@@ -115,7 +115,7 @@ models.Model* m;
 models.QuerySet* n;
 
 m = new ExampleModel;
-n = m->get("id", '=', 7);
+n = m->get("id__eq", 7);
 
 n.set("income", 20);
 
@@ -131,9 +131,9 @@ models.Model* m;
 models.QuerySet* n;
 
 m = new ExampleModel;
-n = m->get("id", '=', 7);
+n = m->get("id__eq", 7);
 
-n.delete();
+n->delete();
 
 n.save();
 ```

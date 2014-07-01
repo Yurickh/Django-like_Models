@@ -1,8 +1,12 @@
+#ifndef DLCPP_MODULE
+#define DLCPP_MODULE
+
 #include <iostream>
 #include <utility>
 #include <list>
 #include <map>
 #include <string>
+#include <sstring>
 #include <sqlite3.h>
 
 #define DLCPP_LIST(x) 	std::list<std::map<string, x>>
@@ -14,15 +18,29 @@
 namespace models
 {
 
-///////////////////RETURNSET//////////////////////////////
+    class QuerySet;
+    class Field;
+    class Model;
 
-	class ReturnSet
+///////////////////QUERYSET//////////////////////////////
+
+	class QuerySet
 	{
-		//YEAH NOTHING HERE
+    private:
+        stringstream SQLquery;
+
+    public:
+        void set(string column, bool    content);
+        void set(string column, string  content);
+        void set(string column, float   content);
+        void set(string column, int     content);
+        void set(string column, Model&  content);
+
+        void delete(void);
 	};
 
 	template<typename value_type>
-	class SingleSet : public ReturnSet
+	class SingleSet : protected QuerySet
 	{
 	private:
 		DLCPP_MAP(value_type) value;
@@ -49,7 +67,7 @@ namespace models
 		DLCPP_MAP_ITER                   insert(DLCPP_MAP_ITER pos, const value_type& val);
 		// range insert is not currently supported
 
-		// ERASE
+		//ERASE
 		void 			erase(DLCPP_MAP_ITER pos);
 		unsigned int 	erase(const string& k);
 		void			erase(DLCPP_MAP_ITER first, DLCPP_MAP_ITER last);
@@ -68,7 +86,7 @@ namespace models
 	};
 
     template<typename value_type>
-    class MultipleSet : public ReturnSet
+    class MultipleSet : protected QuerySet
     {
     private:
         DLCPP_LIST(value_type) value;
@@ -255,16 +273,29 @@ namespace models
 		OneToOneField& on_delete(string);
 	};
 
+////////////////////MODELS////////////////////////////////
 
-////////////////////QUERYSET////////////////////////////////
+    class Model
+    {
+    protected:
+        DLCPP_MAP(Field*) column;
 
-	typedef std::map<string, Field*> FieldMap;
+    public:
+        static void DROP(void);
 
-	class QuerySet
-	{
-		public:
-			QuerySet();
-	};
+        QuerySet* filter(stringstream requestr, bool);
+        QuerySet* filter(stringstream requestr, string);
+        QuerySet* filter(stringstream requestr, float);
+        QuerySet* filter(stringstream requestr, int);
+
+        QuerySet* get(stringstream requestr, bool);
+        QuerySet* get(stringstream requestr, string);
+        QuerySet* get(stringstream requestr, float);
+        QuerySet* get(stringstream requestr, int);
+
+        QuerySet* new(void);
+    };
+
 }
 
-// .default
+#endif
