@@ -1,13 +1,21 @@
 #ifndef DLCPP_MODULE
 #define DLCPP_MODULE
 
+#include <ctime>
+#include <sqlite3.h>
+
 #include <iostream>
 #include <utility>
 #include <list>
 #include <map>
 #include <string>
 #include <sstream>
-#include <sqlite3.h>
+#include <stdexcept>
+#include <fstream>
+
+extern "C" {
+#include "DLCpp_SETTINGS.h"
+}
 
 #define DLCPP_LIST(x) 	std::list<std::map<std::string, x> >
 #define DLCPP_MAP(x)	std::map<std::string, x>
@@ -15,26 +23,34 @@
 #define DLCPP_LIST_ITER(x) std::list<std::map<std::string, x> >
 #define DLCPP_MAP_ITER(x)  std::map<std::string, x>::iterator
 
+//For correctely CRTPing Models.
+#define DLCPP_NEW_MODEL(Type) class Type : public models::Model<Type>
+
 namespace models
 {
 
     class QuerySet;
     class Field;
+
+	template<class Derived>
     class Model;
 
+	std::string getime(void);
+
+/*
 ///////////////////QUERYSET//////////////////////////////
 
 	class QuerySet
 	{
     private:
         std::stringstream SQLquery;
-        std::string database;
-        std::string table_name;
-        std::string pk_field;
-        std::string pk_value;
+		Model* table;
+        std::pair<std::string, std::string> __pk;
 
     public:
         QuerySet();
+		
+		std::string pk(void);
 
         void set(std::string column, bool           content);
         void set(std::string column, std::string    content);
@@ -164,18 +180,18 @@ namespace models
 	public:
 		std::string sql;
 
-		Field& null(bool null);
+		/*Field& null(bool null);
 		Field& blank(bool blank);
 		Field& choices(const std::map<std::string, std::string>&);
 		Field& db_column(std::string);
 		Field& db_index(bool);
 		Field& primary_key(bool);
-		Field& unique(bool);
+		Field& unique(bool);*/
 	};
 
 	/** Para campos booleanos (TRUE-FALSE) 
 		ENUM('TRUE', 'FALSE') 
-		*/
+		*
 	class BooleanField : public Field
 	{
 		bool __standard;
@@ -188,7 +204,7 @@ namespace models
 	/** Para campos de texto.
 		max_length é necessário para a construção deste campo. 
 		VARCHAR(max_length)
-		*/
+		*
 	class CharField : public Field
 	{
 		std::string __standard;
@@ -202,7 +218,7 @@ namespace models
 
 	/** Para campos de números reais. 
 		FLOAT(size, d)
-		*/
+		*
 	class FloatField : public Field
 	{
 		float __standard;
@@ -222,14 +238,16 @@ namespace models
 		int __standard;
 
 	public:
+		IntegerField(void);
+
 		int returnObj;
 		IntegerField& size(int);
 		IntegerField& standard(int);
 	};
-
+/*
 	/** Para telacionamentos N-1.
 		O SQL gerado varia de acordo com o Model referenciado, associando com a PK definida.
-		*/
+		*
 	class ForeignKey : public Field
 	{
 		std::string __related_name;
@@ -245,7 +263,7 @@ namespace models
 
 	/** Para relacionamentos N-N.
 		Uma tabela intermediária será gerada, com os campos necessários para relacioná-las.
-		*/
+		*
 	class ManyToManyField : public Field
 	{
 		std::string __related_name;
@@ -265,7 +283,7 @@ namespace models
 
 	/** Para relacionamentos 1-1.
 		A SQL gerada dependerá da chave primária da tabela relacionada.
-		*/
+		*
 	class OneToOneField : public Field
 	{
 		std::string __related_name;
@@ -278,18 +296,85 @@ namespace models
 		OneToOneField& to_field(const Field&);
 		OneToOneField& on_delete(std::string);
 	};
-
+/*
 ////////////////////MODELS////////////////////////////////
+*/
 
+	template<class Derived> // Simulated Dynamic Binding
     class Model
     {
-    protected:
-        DLCPP_MAP(Field*) column;
+	protected:
+		DLCPP_MAP(Field) column; // Columns
+		std::string ref; // TableName
 
-    public:
+	public:
+		static sqlite3* db;
+
+		~Model(void){ 
+			int err;
+
+			err = sqlite3_close(db);
+
+			if(DLCPP_VERBOSE_LEVEL == 2)
+			{
+				std::fstream log_file;
+
+				log_file.open(DLCPP_LOGFILE, std::fstream::out | std::fstream::app);
+
+				if(err != SQLITE_OK)
+				{
+					log_file << "[models::~Model()][" << getime() << "] ERROR DISCONNECTING TO DATABASE; SQLITE ERROR CODE ";
+					log_file << err;
+					log_file << "." << std::endl;
+				}
+				else
+				{
+					log_file << "[models::~Model()][" << getime() << "] SUCCESSFULLY DISCONNECTED." << std::endl;
+				}
+			}
+
+		}
+		Model() throw (std::runtime_error)
+		{
+			int err;
+
+			err = sqlite3_open(DLCPP_PATH_2_DB, &db);
+
+			if(DLCPP_VERBOSE_LEVEL == 2)
+			{
+				std::fstream log_file;
+
+				log_file.open(DLCPP_LOGFILE, std::fstream::out | std::fstream::app);
+				if(err != SQLITE_OK)
+				{
+					log_file << "[models::Model() ][" << getime() <<"] ERROR CONNECTING TO DATABASE; SQLITE ERROR CODE ";
+					log_file << err;
+					log_file << "." << std::endl;
+
+					log_file.close();
+					throw std::runtime_error("Connection error.");
+				}
+				else
+				{
+					log_file << "[models::Model() ][" << getime() <<"] CONNECTION SUCCESSFUL." << std::endl;
+				}
+				log_file.close();
+			}
+			else
+			{
+				if (err)
+					throw std::runtime_error("Connection error.");
+			}
+		}
+
+		Field* pk;
+
+		static void CREATE(void);
         static void DROP(void);
 
-        QuerySet* filter(std::stringstream requestr, bool);
+		void retrieve(DLCPP_MAP(Field)&, std::string&);
+
+        /*QuerySet* filter(std::stringstream requestr, bool);
         QuerySet* filter(std::stringstream requestr, std::string);
         QuerySet* filter(std::stringstream requestr, float);
         QuerySet* filter(std::stringstream requestr, int);
@@ -299,9 +384,86 @@ namespace models
         QuerySet* get(std::stringstream requestr, float);
         QuerySet* get(std::stringstream requestr, int);
 
-        QuerySet* insert(void);
+        QuerySet* insert(void);*/
     };
 
-}
+	template<class Derived>
+	sqlite3* Model<Derived>::db = NULL;
 
+	template<class Derived>
+	void Model<Derived>::retrieve(DLCPP_MAP(Field) &a, std::string &c)
+	{
+		a = this->column;
+		c = this->ref;
+	}
+
+	template<class Derived>
+	void Model<Derived>::CREATE()
+	{
+		DLCPP_MAP_ITER(Field) it;
+		DLCPP_MAP(Field) column;
+		std::stringstream createStt;
+		std::string temp;
+		std::string ref;
+		char** zErrMsg;
+		models::Model<Derived>* m;
+		int err;
+
+		m = new Derived; // already opens a connection with database through db;
+
+		/*
+		m->retrieve(column, ref);
+
+		createStt << "CREATE " << ref << "TABLE IF NOT EXISTS(";
+
+		for(it = column.begin(); it != column.end(); ++it)
+			createStt << (it == column.begin()? "" : ",") << it->second.sql;
+
+		createStt << ");";
+
+		temp = createStt.str();
+
+		err = sqlite3_exec(Derived::db, temp.c_str(), NULL, NULL, zErrMsg);
+
+		if(DLCPP_VERBOSE_LEVEL)
+		{
+			std::ofstream log_file;
+			log_file.open(DLCPP_LOGFILE);
+
+
+			if(err)
+			{
+				if(DLCPP_VERBOSE_LEVEL == 2)
+					log_file << "[models::Model::CREATE()] ERROR WHILE CREATING TABLE. SQLITE ERROR CODE " << err << ".\n";
+				else
+					log_file << "CREATE CLAUSE FAILED.\n";
+
+				log_file << "SQL:\n";
+			}
+			
+			log_file << temp << std::endl;
+
+			log_file.close();
+		}
+		*/
+
+		delete m; // closes connection
+	}
+
+	template<class Derived>
+	void Model<Derived>::DROP()
+	{
+		std::stringstream deleteStt;
+		std::string temp;
+		char** zErrMsg;
+
+		sqlite3_open(DLCPP_PATH_2_DB, &Derived::db);
+
+		deleteStt << "DROP TABLE " << Derived::ref << ";";
+
+		temp = deleteStt.str();
+		sqlite3_exec(Derived::db, temp.c_str(), NULL, NULL, zErrMsg);
+		sqlite3_close(Derived::db);
+	}
+}
 #endif

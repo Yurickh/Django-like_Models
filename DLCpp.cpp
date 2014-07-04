@@ -1,105 +1,49 @@
 #include "DLCpp.h"
 
-///////////////////QUERYSET//////////////////////////////
-
-template<typename value_type>
-std::stringstream updateStatement(	std::stringstream &SQLquery,
-									std::string &table_name, 
-									value_type	&column, 
-									std::string	&content, 
-									std::string &pk_field,
-									std::string &pk_value )
+models::IntegerField& models::IntegerField::size(int s)
 {
-	SQLquery << "UPDATE ";
-	SQLquery << table_name;
-	SQLquery << " SET ";
-	SQLquery << column;
-	SQLquery << "=";
-	SQLquery << content;
-	SQLquery << " WHERE ";
-	SQLquery << pk_field;
-	SQLquery << "=";
-	SQLquery << pk_value;
-	SQLquery << ";";
+	std::size_t found;
+	std::stringstream t1;
+	std::string t2;
 
-	return &SQLquery;
+	t1 << "(" << s << ")";
+	t2 = t1.str();
+
+	found = sql.find(std::string(" INT"));
+	found += 4;
+
+	sql.insert(found, t2);
+
+	return *this;
 }
 
-std::stringstream deleteStatement(	std::string &table_name,
-									std::string &pk_field,
-									std::string &pk_value )
+models::IntegerField& models::IntegerField::standard(int s)
 {
-	std::stringstream SQLquery;
+	std::stringstream temp;
 
-	SQLquery << "DELETE FROM ";
-	SQLquery << table_name;
-	SQLquery << " WHERE ";
-	SQLquery << pk_field;
-	SQLquery << "=";
-	SQLquery << pk_value;
-	SQLquery << ";";
-}
-									
+	temp << sql << " DEFAULT " << s;
 
-void models::QuerySet::set(std::string column, bool content)
-{
-	SQLquery = updateStatement<bool>(
-							SQLquery,
-							table_name,
-							column,
-							content,
-							pk_field,
-							pk_value );
+	sql = temp.str();
+
+	return *this;
 }
 
-
-void models::QuerySet::set(std::string column, std::string content)
+models::IntegerField::IntegerField()
 {
-	SQLquery = updateStatement<std::string>(
-							SQLquery,
-							table_name,
-							column,
-							content,
-							pk_field,
-							pk_value );
-}
-
-
-void models::QuerySet::set(std::string column, float content)
-{
-	SQLquery = updateStatement<float>(
-							SLQquery,
-							table_name,
-							column,
-							content,
-							pk_field,
-							pk_value );
-}
-
-
-void models::QuerySet::set(std::string column, int content)
-{
-	SQLquery = updateStatement<int>(
-							SLQquery,
-							table_name,
-							column,
-							content,
-							pk_field,
-							pk_value );
-}
-
-
-void models::QuerySet::set(std::string column, Model& content)
-{
-	std::string pk = content.pk;
-
+	__notNull = true;
+	__blank = false;
+	__primary_key = false;
+	__unique = false;
+	__db_index = false;
 	
+	sql = "INT NOT NULL;";
 }
 
-void models::QuerySet::remove()
+std::string models::getime()
 {
-	SQLquery = deleteStatement(
-							table_name,
-							pk_field,
-							pk_value );
+	time_t now = time(0);
+	std::string dt = ctime(&now);
+	dt = dt.substr(0, dt.size()-1);
+
+	return dt;
 }

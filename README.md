@@ -27,14 +27,17 @@ In order to create a table, you must:
 
 
     ```c++
-    class ExampleModel :: public models::Model
+    DLCPP_NEW_MODEL(ExampleModel)
     {
-        ExampleModel()
+        public: ExampleModel()
         {
-            column["id"] = new models::IntegerField().primary_key();
-            column["income"] = new models::FloatField().standard(12.4).null(True);
+            column["id"] = models::IntegerField().primary_key();
+            column["income"] = models::FloatField().standard(12.4).null(True);
         }
     };
+
+    Model* m = new ExampleModel();
+    m::CREATE();
     ```
 
 ### DROP TABLE

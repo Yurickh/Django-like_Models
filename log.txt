@@ -1,0 +1,2 @@
+[models::Model() ][Fri Jul  4 08:57:55 2014] CONNECTION SUCCESSFUL.
+[models::~Model()][Fri Jul  4 08:57:55 2014] SUCCESSFULLY DISCONNECTED.
