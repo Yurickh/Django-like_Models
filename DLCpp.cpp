@@ -36,7 +36,7 @@ models::IntegerField::IntegerField()
 	__unique = false;
 	__db_index = false;
 	
-	sql = "INT NOT NULL;";
+	sql = "INT NOT NULL";
 }
 
 std::string models::getime()

@@ -323,13 +323,13 @@ namespace models
 
 				if(err != SQLITE_OK)
 				{
-					log_file << "[models::~Model()][" << getime() << "] ERROR DISCONNECTING TO DATABASE; SQLITE ERROR CODE ";
-					log_file << err;
+					log_file << "[   models::~Model()    ][" << getime() << "] ERROR DISCONNECTING TO DATABASE; SQLITE ERROR CODE ";
+					log_file << sqlite3_errcode(db);
 					log_file << "." << std::endl;
 				}
 				else
 				{
-					log_file << "[models::~Model()][" << getime() << "] SUCCESSFULLY DISCONNECTED." << std::endl;
+					log_file << "[   models::~Model()    ][" << getime() << "] SUCCESSFULLY DISCONNECTED." << std::endl;
 				}
 			}
 
@@ -337,6 +337,13 @@ namespace models
 		Model() throw (std::runtime_error)
 		{
 			int err;
+			std::string classname;
+
+			classname = __PRETTY_FUNCTION__;
+			classname = classname.substr(classname.find("Derived = ")+10, classname.size());
+			classname = classname.substr(0, classname.size()-1);
+
+			ref = classname;
 
 			err = sqlite3_open(DLCPP_PATH_2_DB, &db);
 
@@ -347,8 +354,8 @@ namespace models
 				log_file.open(DLCPP_LOGFILE, std::fstream::out | std::fstream::app);
 				if(err != SQLITE_OK)
 				{
-					log_file << "[models::Model() ][" << getime() <<"] ERROR CONNECTING TO DATABASE; SQLITE ERROR CODE ";
-					log_file << err;
+					log_file << "[    models::Model()    ][" << getime() <<"] ERROR CONNECTING TO DATABASE; SQLITE ERROR CODE ";
+					log_file << sqlite3_errcode(db);
 					log_file << "." << std::endl;
 
 					log_file.close();
@@ -356,7 +363,7 @@ namespace models
 				}
 				else
 				{
-					log_file << "[models::Model() ][" << getime() <<"] CONNECTION SUCCESSFUL." << std::endl;
+					log_file << "[    models::Model()    ][" << getime() <<"] CONNECTION SUCCESSFUL." << std::endl;
 				}
 				log_file.close();
 			}
@@ -411,13 +418,19 @@ namespace models
 
 		m = new Derived; // already opens a connection with database through db;
 
-		/*
+		
 		m->retrieve(column, ref);
 
-		createStt << "CREATE " << ref << "TABLE IF NOT EXISTS(";
+		createStt << "CREATE TABLE IF NOT EXISTS " << ref << "(\n";
 
-		for(it = column.begin(); it != column.end(); ++it)
-			createStt << (it == column.begin()? "" : ",") << it->second.sql;
+		for(it = column.begin(); it != column.end();)
+		{
+			createStt << it->first << " " << it->second.sql;
+			++it;
+			if(it != column.end())
+				createStt << ",";
+			createStt << "\n";
+		}
 
 		createStt << ");";
 
@@ -427,25 +440,24 @@ namespace models
 
 		if(DLCPP_VERBOSE_LEVEL)
 		{
-			std::ofstream log_file;
-			log_file.open(DLCPP_LOGFILE);
+			std::fstream log_file;
+			log_file.open(DLCPP_LOGFILE, std::fstream::out | std::fstream::app);
 
 
-			if(err)
+			if(err != SQLITE_OK)
 			{
 				if(DLCPP_VERBOSE_LEVEL == 2)
-					log_file << "[models::Model::CREATE()] ERROR WHILE CREATING TABLE. SQLITE ERROR CODE " << err << ".\n";
+					log_file << "[models::Model::CREATE()][" << getime() << "[ ERROR WHILE CREATING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(Derived::db) << ".\n";
 				else
 					log_file << "CREATE CLAUSE FAILED.\n";
 
-				log_file << "SQL:\n";
+				log_file << "[models::Model::CREATE()][" << getime() << "] SQL:";
 			}
 			
-			log_file << temp << std::endl;
+			log_file << "\n========\n" << temp << "\n========\n" <<std::endl;
 
 			log_file.close();
 		}
-		*/
 
 		delete m; // closes connection
 	}

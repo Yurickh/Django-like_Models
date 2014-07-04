@@ -8,8 +8,8 @@ DLCPP_NEW_MODEL(Abacate)
 {
 	public: Abacate()
 	{
-		column["1int"] = models::IntegerField();
-		column["2int"] = models::IntegerField().size(32);
+		column["coluna1"] = models::IntegerField();
+		column["coluna2"] = models::IntegerField().size(32);
 	}
 };
 
