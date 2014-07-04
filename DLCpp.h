@@ -447,7 +447,7 @@ namespace models
 			if(err != SQLITE_OK)
 			{
 				if(DLCPP_VERBOSE_LEVEL == 2)
-					log_file << "[models::Model::CREATE()][" << getime() << "[ ERROR WHILE CREATING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(Derived::db) << ".\n";
+					log_file << "[models::Model::CREATE()][" << getime() << "] ERROR WHILE CREATING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(Derived::db) << zErrMsg << ".\n";
 				else
 					log_file << "CREATE CLAUSE FAILED.\n";
 
@@ -456,6 +456,8 @@ namespace models
 			
 			log_file << "\n========\n" << temp << "\n========\n" <<std::endl;
 
+			sqlite3_free(zErrMsg);
+			
 			log_file.close();
 		}
 
@@ -468,14 +470,39 @@ namespace models
 		std::stringstream deleteStt;
 		std::string temp;
 		char** zErrMsg;
+		Model<Derived>* m = new Derived;
+		DLCPP_MAP(Field) f;
+		int rc;
 
-		sqlite3_open(DLCPP_PATH_2_DB, &Derived::db);
+		m->retrieve(f, temp);
 
-		deleteStt << "DROP TABLE " << Derived::ref << ";";
-
+		deleteStt << "DROP TABLE " << temp << ";";
 		temp = deleteStt.str();
-		sqlite3_exec(Derived::db, temp.c_str(), NULL, NULL, zErrMsg);
-		sqlite3_close(Derived::db);
+		rc = sqlite3_exec(Derived::db, temp.c_str(), NULL, NULL, zErrMsg);
+
+		if(DLCPP_VERBOSE_LEVEL)
+		{
+			std::fstream log_file;
+			log_file.open(DLCPP_LOGFILE, std::fstream::out | std::fstream::app);
+
+			if(rc != SQLITE_OK)
+			{
+				if(DLCPP_VERBOSE_LEVEL == 2)
+					log_file << "[ models::Model::DROP() ][" + getime() << "] ERROR WHILE DROPPING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(Derived::db) << ": " << zErrMsg <<"\n";
+				else
+					log_file << "DROP CLAUSE FAILEDn\n";
+
+				log_file << "[ models::Model::DROP() ][" + getime() << "] SQL:";
+
+				sqlite3_free(zErrMsg);
+			}
+
+			log_file << "\n========\n" << temp << "\n========\n" <<std::endl;
+
+			log_file.close();
+		}
+
+		delete m;
 	}
 }
 #endif

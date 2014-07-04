@@ -16,7 +16,7 @@ DLCPP_NEW_MODEL(Abacate)
 int main()
 {
 	try
-	{	Abacate::CREATE(); }
+	{	Abacate::DROP(); }
 	catch(exception e)
 	{
 		printf("%s", e.what());
