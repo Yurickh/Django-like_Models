@@ -16,7 +16,20 @@ DLCPP_NEW_MODEL(Abacate)
 int main()
 {
 	try
-	{	Abacate::DROP(); }
+	{
+		Abacate* a;
+		SQLITE_QUERYSET* q;
+		
+		Abacate::CREATE(); 
+
+		q = a->insert();
+		
+		q.set("coluna1", 2);
+		q.set("coluna2", 3);
+
+		q->save();
+		
+	}
 	catch(exception e)
 	{
 		printf("%s", e.what());

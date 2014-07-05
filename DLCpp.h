@@ -25,11 +25,13 @@ extern "C" {
 
 //For correctely CRTPing Models.
 #define DLCPP_NEW_MODEL(Type) class Type : public models::Model<Type>
+#define DLCPP_QUERYSET(Type) models::QuerySet<Type>
 
 namespace models
 {
-
+	template<class Derived>
     class QuerySet;
+
     class Field;
 
 	template<class Derived>
@@ -37,76 +39,81 @@ namespace models
 
 	std::string getime(void);
 
-/*
+
 ///////////////////QUERYSET//////////////////////////////
 
+	template<class Derived>
 	class QuerySet
 	{
     private:
         std::stringstream SQLquery;
-		Model* table;
+		Derived* table;
         std::pair<std::string, std::string> __pk;
 
     public:
-        QuerySet();
+        QuerySet(Derived* table, std::string pkfield, std::string pkvalue);
 		
 		std::string pk(void);
-
+/*
         void set(std::string column, bool           content);
         void set(std::string column, std::string    content);
-        void set(std::string column, float          content);
+        void set(std::string column, float          content);*/
         void set(std::string column, int            content);
-        void set(std::string column, QuerySet&      content);
+//        void set(std::string column, QuerySet&      content);
 
-        void remove(void);
+//        void remove(void);
+
+		void save(void);
 	};
 
-	template<typename value_type>
-	class SingleSet : protected QuerySet
+	template<typename value_type, class Derived>
+	class SingleSet : protected QuerySet<Derived>
 	{
 	private:
 		typename DLCPP_MAP(value_type) value;
 
 	public:
+		DLCPP_MAP(value_type)& getv(void) { return value; }
+
 		//OPERATORS
-		value_type                operator[](const std::string& index);
-		SingleSet<value_type>&    operator=(const SingleSet<value_type>& x);
-		SingleSet<value_type>&    operator=(const typename DLCPP_MAP(value_type)& x);
+		value_type                operator[](const std::string& index){ return value[index]; }
+		SingleSet<value_type, Derived>&    operator=(const SingleSet<value_type, Derived>& x){ value = x.getv(); return *this;}
+		SingleSet<value_type, Derived>&    operator=(const typename DLCPP_MAP(value_type)& x){ value = x; return *this;}
 
 		//ITERATORS
-		typename DLCPP_MAP_ITER(value_type) begin(void);
-		typename DLCPP_MAP_ITER(value_type) end(void);
-		typename DLCPP_MAP_ITER(value_type) rbegin(void);
-		typename DLCPP_MAP_ITER(value_type) rend(void);
+		typename DLCPP_MAP_ITER(value_type) begin(void)   { return value.begin(); }
+		typename DLCPP_MAP_ITER(value_type) end(void) 	  { return value.end();   }
+		typename DLCPP_MAP_ITER(value_type) rbegin(void) { return value.rbegin();}
+		typename DLCPP_MAP_ITER(value_type) rend(void)   { return value.rend();  }
 
 		//CAPACITY
-		bool 			empty(void)     const;
-		unsigned int 	size(void)      const;
-		unsigned int 	max_size(void)  const;
+		bool 			empty(void)     const { return value.empty();   }
+		unsigned int 	size(void)      const { return value.size();    }
+		unsigned int 	max_size(void)  const { return value.max_size();}
 
 		//INSERT
-		std::pair<typename DLCPP_MAP_ITER(value_type), value_type> insert(const value_type& val);
-		typename DLCPP_MAP_ITER(value_type)                   insert(typename DLCPP_MAP_ITER(value_type) pos, const value_type& val);
+		std::pair<typename DLCPP_MAP_ITER(value_type), value_type> insert(const value_type& val){ return value.insert(val); }
+		typename DLCPP_MAP_ITER(value_type)                   insert(typename DLCPP_MAP_ITER(value_type) pos, const value_type& val){ return value.insert(pos, val); }
 		// range insert is not currently supported
 
 		//ERASE
-		void 			erase(typename DLCPP_MAP_ITER(value_type) pos);
-		unsigned int 	erase(const std::string& k);
-		void			erase(typename DLCPP_MAP_ITER(value_type) first, typename DLCPP_MAP_ITER(value_type) last);
-		void 			clear(void);
+		void 			erase(typename DLCPP_MAP_ITER(value_type) pos){ return value.erase(pos); }
+		unsigned int 	erase(const std::string& k){ return value.erase(k); }
+		void			erase(typename DLCPP_MAP_ITER(value_type) first, typename DLCPP_MAP_ITER(value_type) last){ return value.erase(first, last); }
+		void 			clear(void){ value.clear(); }
 
 		// Observers not currently supported
 
 		//OPERATIONS
-		typename DLCPP_MAP_ITER(value_type)			find(const std::string& k);
-		unsigned int 			count(const std::string& k) const;
-		typename DLCPP_MAP_ITER(value_type)			lower_bound(const std::string& k);
-		typename DLCPP_MAP_ITER(value_type)			upper_bound(const std::string& k);
+		typename DLCPP_MAP_ITER(value_type)			find(const std::string& k){ return value.find(k); }
+		unsigned int 			count(const std::string& k) const{ return value.count(k); }
+		typename DLCPP_MAP_ITER(value_type)			lower_bound(const std::string& k){ return value.lower_bound(k); }
+		typename DLCPP_MAP_ITER(value_type)			upper_bound(const std::string& k){ return value.upper_bound(k); }
 		// equal_range not currently supported
 
 		// get_allocator not currently supported
 	};
-
+/*
     template<typename value_type>
     class MultipleSet : protected QuerySet
     {
@@ -390,8 +397,8 @@ namespace models
         QuerySet* get(std::stringstream requestr, std::string);
         QuerySet* get(std::stringstream requestr, float);
         QuerySet* get(std::stringstream requestr, int);
-
-        QuerySet* insert(void);*/
+*/
+        QuerySet* insert(void);
     };
 
 	template<class Derived>
@@ -504,5 +511,26 @@ namespace models
 
 		delete m;
 	}
-}
+
+	template<class Derived>
+	QuerySet<Derived>(Derived* table, std::string pkfield, std::string pkvalue)
+	{
+		this->__table = table;
+		this->__pk = pair(pkfield, pkvalue);
+	}
+
+	template<class Derived>
+	QuerySet<Derived>* Model<Derived>::insert()
+	{
+		QuerySet<Derived>* qs;
+
+		qs = new QuerySet<Derived>;
+	}
+
+	template<class Derived>
+	void set(std::string column, int content)
+	{
+		
+	}
+};
 #endif

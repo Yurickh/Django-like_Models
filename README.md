@@ -21,12 +21,13 @@ In order to create a table, you must:
 
 1. Create a subclass of models::Model, as follows:
 
-    `class ExampleModel :: public models::Model;`
+    `DLCPP_NEW_MODEL(ExampleModel);`
 
 2. Create the columns as models::Field:
 
 
     ```c++
+
     DLCPP_NEW_MODEL(ExampleModel)
     {
         public: ExampleModel()
@@ -36,25 +37,17 @@ In order to create a table, you must:
         }
     };
 
-    Model* m = new ExampleModel();
-    m::CREATE();
+    //Inside your main:
+    ExampleModel::CREATE();
     ```
 
 ### DROP TABLE
-
-To drop a table, you have two options:
-
-1. Runtime drop
 
 Use the DROP() static method:
 
 ```c++
 ExampleModel::DROP();
 ```
-    
-2. Normal drop
-
-Just delete de model declaration.
 
 ### Retrieve data (SELECT)
 
@@ -101,7 +94,7 @@ models::Model* m;
 models::QuerySet* n;
 
 m = new ExampleModel;
-n = m->insert1();
+n = m->insert();
 
 n.set("income", 10000);
 n.set("id", 7);
@@ -111,7 +104,7 @@ n.save();
 
 ### UPDATE data
 
-To update a data, you must retrieve it first:
+To update data, you must retrieve it first:
 
 ```c++
 models::Model* m;
