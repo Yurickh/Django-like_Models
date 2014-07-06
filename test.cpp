@@ -20,11 +20,12 @@ int main()
 	Abacate* a = new Abacate;
 	try
 	{
-		models::SingleSet<Abacate>* q;
+		models::MultipleSet<Abacate>* q;
 
-		q = a->get("coluna1__gt", 0);
+		q = a->filter("coluna1__gt", 0);
 
-		cout << "RET:" << (*q)["coluna2"] << endl;
+		for(DLCPP_LIST_ITER it=q->begin(); it != q->end(); ++it)
+			cout << "RET:" << (*it)["coluna2"] << endl;
 	}
 	catch(std::runtime_error e)
 	{
