@@ -30,11 +30,11 @@ models::IntegerField& models::IntegerField::standard(int s)
 
 models::IntegerField::IntegerField()
 {
-	__notNull = true;
-	__blank = false;
-	__primary_key = false;
-	__unique = false;
-	__db_index = false;
+	__notNull      = true;
+	__blank        = false;
+	__primary_key  = false;
+	__unique       = false;
+	__db_index     = false;
 	
 	sql = "INT NOT NULL";
 }

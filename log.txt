@@ -1,0 +1,13 @@
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 INT NOT NULL,
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+SELECT *  FROM Abacate WHERE coluna1> '0'
+========
+
