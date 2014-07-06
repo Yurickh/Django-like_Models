@@ -17,20 +17,28 @@ DLCPP_NEW_MODEL(Abacate)
 
 int main()
 {
+	Abacate* a = new Abacate;
 	try
 	{
-		Abacate* a = new Abacate;
 		models::SingleSet<Abacate>* q;
 
-		q = a->get("coluna1__eq", 2);
+		q = a->get("coluna1__gt", 0);
 
-		cout << "RETURNED VALUE:" << (*q)["coluna2"] << endl;
-
-		delete a;
+		cout << "RET:" << (*q)["coluna2"] << endl;
 	}
 	catch(std::runtime_error e)
 	{
-		printf("%s", e.what());
+		cout << e.what();
 	}
+	catch(models::ObjectDoesNotExist e)
+	{
+		cout << "NOOP";
+	}
+	catch(models::MultipleObjectsReturned e)
+	{
+		cout << "MUL";
+	}
+
+	delete a;
 	return 0;
 }

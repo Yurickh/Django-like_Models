@@ -116,12 +116,6 @@ namespace models
 
             rc = sqlite3_exec(this->__table->db, temp.c_str(), cb_single, &value, &zErrMsg);
 
-            if(rc == SQLITE_ABORT)
-                throw MultipleObjectsReturned();
-
-            if(value.empty())
-                throw ObjectDoesNotExist();
-
             if(DLCPP_VERBOSE_LEVEL)
             {
                 std::fstream log_file;
@@ -136,11 +130,24 @@ namespace models
 
                     log_file << "[models::SingleSet<>.get][" << getime() << "] SQL:";
                 }
+                else if(value.empty())
+                {
+                    if(DLCPP_VERBOSE_LEVEL == 2)
+                        log_file << "[models::SingleSet<>.get][" << getime() << "] ERROR WHILE RETRIEVING DATA FROM TABLE. NO DATA FOUND.\n";
+                    else log_file << "SELECT CLAUSE FAILED.\n";
+
+                    log_file << "[models::SingleSet<>get][" << getime() << "] SQL:";
+                }
 
                 log_file << "\n========\n" << temp << "\n========\n" <<std::endl;
 
                 log_file.close();
             }
+
+            if(value.empty())
+                throw ObjectDoesNotExist();
+            if(rc==SQLITE_ABORT)
+                throw MultipleObjectsReturned();
         }
 
         //OPERATORS
@@ -642,7 +649,7 @@ namespace models
 		rqlist.pop_front();
 
 		token = tostring(value);
-		temp.insert(pos, token);
+		temp.insert(pos, "'" + token + "'");
 
 		pos = temp.find(" FROM");
 		temp.insert(pos, " * ");

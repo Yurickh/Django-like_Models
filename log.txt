@@ -1,4 +1,20 @@
-[    models::Model()    ][Sun Jul  6 07:15:33 2014] CONNECTION TO Abacate SUCCESSFUL.
+[    models::Model()    ][Sun Jul  6 07:32:25 2014] CONNECTION TO Abacate SUCCESSFUL.
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 INT NOT NULL,
+coluna2 INT(32) NOT NULL
+);
+========
+
+[models::QuerySet<>.save][Sun Jul  6 07:32:25 2014] ERROR WHILE MODIFYING TABLE. SQLITE ERROR CODE 1: table Abacate has no column named column1
+[models::QuerySet<>.save][Sun Jul  6 07:32:25 2014] SQL:
+========
+INSERT INTO Abacate ( column1, column2) VALUES ( '5' , '7' );
+========
+
+[   models::~Model()    ][Sun Jul  6 07:32:25 2014] SUCCESSFULLY DISCONNECTED.
+[    models::Model()    ][Sun Jul  6 07:33:07 2014] CONNECTION TO Abacate SUCCESSFUL.
 
 ========
 CREATE TABLE IF NOT EXISTS Abacate(
@@ -9,7 +25,23 @@ coluna2 INT(32) NOT NULL
 
 
 ========
-SELECT *  FROM Abacate WHERE coluna1= 2
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( '5' , '7' );
 ========
 
-[   models::~Model()    ][Sun Jul  6 07:15:33 2014] SUCCESSFULLY DISCONNECTED.
+[   models::~Model()    ][Sun Jul  6 07:33:07 2014] SUCCESSFULLY DISCONNECTED.
+[    models::Model()    ][Sun Jul  6 07:34:12 2014] CONNECTION TO Abacate SUCCESSFUL.
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 INT NOT NULL,
+coluna2 INT(32) NOT NULL
+);
+========
+
+[models::SingleSet<>.get][Sun Jul  6 07:34:12 2014] ERROR WHILE RETRIEVING DATA FROM TABLE. SQLITE ERROR CODE 4: callback requested query abort
+[models::SingleSet<>.get][Sun Jul  6 07:34:12 2014] SQL:
+========
+SELECT *  FROM Abacate WHERE coluna1> '0'
+========
+
+[   models::~Model()    ][Sun Jul  6 07:34:12 2014] SUCCESSFULLY DISCONNECTED.
