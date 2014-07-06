@@ -56,34 +56,33 @@ To retrieve a set of data, use the .filter() method. e.g.:
 
 ```c++
 ExampleModel* m;
-models::QuerySet<ExampleModel>* ret;
+models::MultipleSet<ExampleModel>* ret;
 
 m = new ExampleModel;
 ret = m->filter("income__gt", 10); // selects entries that have income > 10
 
-// in this case, returns a STL list 
-// with a STL map<string, int> defined by 
-// column_name => column_value.
+// in this case, returns a DLCPP_LIST, that consists of
+// a STL list of STL maps<std::string, std::string>.
 
 // Shall print the ID of all entries returned.
-for(DLCPP_LIST::iterator i = ret->begin(); i != ret->end(); ++i)
-    cout << *i["id"];
+for(DLCPP_LIST_ITER i = ret->begin(); i != ret->end(); ++i)
+    cout << (*i)["id"];
 ```
 
 To retrieve a single instance of data, it's better to use the .get() method. e.g.:
 
 ```c++
 ExampleModel* m;
-models::QuerySet<ExampleModel>* ret;
+models::SingleSet<ExampleModel>* ret;
 
 m = new ExampleModel;
 ret = m->get("id__eq", 5);
 
 // in this case, returns a single
-// STL map<string, int> 
+// DLCPP_MAP, that is, a STL map<string, int> 
 // defined by column_name => column_value.
 
-ret["id"] // shall return 5
+(*ret)["id"] // shall return 5
 ```
 
 ### INSERT data
@@ -111,12 +110,12 @@ To update data, you must retrieve it first:
 
 ```c++
 ExampleModel* m;
-models::QuerySet<ExampleModel>* n;
+models::SingleSet<ExampleModel>* n;
 
 m = new ExampleModel;
 n = m->get("id__eq", 7);
 
-n.set("income", 20);
+n["income"] = 20;
 
 n.save();
 ```
@@ -133,6 +132,6 @@ m = new ExampleModel;
 n = m->get("id__eq", 7);
 
 n->remove();
-
-n.save();
 ```
+
+Like the `save()` method, `remove()`s already frees the object too. 
