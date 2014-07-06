@@ -41,7 +41,9 @@ models::IntegerField::IntegerField()
 
 std::string models::getime()
 {
-	time_t now = time(0);
+	time_t now;
+
+	do now = time(0); while(now == -1);
 	std::string dt = ctime(&now);
 	dt = dt.substr(0, dt.size()-1);
 

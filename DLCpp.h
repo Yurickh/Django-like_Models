@@ -73,7 +73,7 @@ namespace models
         QuerySet(std::string pk, std::string sql)
 		{
 			__table = new Derived();
-			SQLquery << sql.substr(0, sql.substr(sql.find(";"), sql.size()).size()+1);
+			SQLquery << sql.substr(0, sql.size() - sql.substr(sql.find(";"), sql.size()).size());
 			this->__pk = pk;
 		}
 		~QuerySet()
@@ -347,7 +347,7 @@ namespace models
 		~Model(void){ 
 			int err;
 
-			err = sqlite3_close(db);
+			err = SQLITE_OK;//sqlite3_close(db); 
 			db = NULL;
 
 			if(DLCPP_VERBOSE_LEVEL == 2)
@@ -367,14 +367,14 @@ namespace models
 				{
 					log_file << "[   models::~Model()    ][" << getime() << "] SUCCESSFULLY DISCONNECTED." << std::endl;
 				}
+
+				log_file.close();
 			}
 		}
 		Model() throw (std::runtime_error)
 		{
 			int err;
 			std::string classname;
-
-			std::cout << "test1" << std::endl;
 
 			// REF INSTANTIATION
 			classname = __PRETTY_FUNCTION__;
@@ -388,8 +388,6 @@ namespace models
 				err = sqlite3_open(DLCPP_PATH_2_DB, &db);
 			else
 				err = SQLITE_OK;
-
-			std::cout << "test2" << std::endl;
 
 			if(DLCPP_VERBOSE_LEVEL == 2)
 			{
@@ -416,8 +414,6 @@ namespace models
 				if (err)
 					throw std::runtime_error("Connection error.");
 			}
-
-			std::cout << "testf" << std::endl;
 		}
 
 		static void CREATE(void);
@@ -459,8 +455,6 @@ namespace models
 
 		m = new Derived; // already opens a connection with database through db;
 
-		std::cout << "check1" << std::endl;
-
 		m->retrieve(column, ref);
 
 		createStt << "CREATE TABLE IF NOT EXISTS " << ref << "(\n";
@@ -476,21 +470,14 @@ namespace models
 			createStt << "\n";
 		}
 
-		std::cout << "check2" << std::endl;
-
 		if(!pk)
 			pk = new std::pair<std::string, Field*>(std::string("ROWID"), NULL);
 			
-
 		createStt << ");";
-
-		std::cout << "check3" << std::endl;
 
 		temp = createStt.str();
 
 		err = sqlite3_exec(m->db, temp.c_str(), NULL, NULL, zErrMsg);
-
-		std::cout << "check4" << std::endl;
 
 		if(DLCPP_VERBOSE_LEVEL)
 		{
@@ -514,8 +501,6 @@ namespace models
 			
 			log_file.close();
 		}
-
-		std::cout << "checkf" << std::endl;
 
 		delete m; // closes connection
 	}
@@ -544,12 +529,12 @@ namespace models
 
 			if(rc != SQLITE_OK)
 			{
-				if(DLCPP_VERBOSE_LEVEL == 2)
+				/*if(DLCPP_VERBOSE_LEVEL == 2)
 					log_file << "[ models::Model::DROP() ][" + getime() << "] ERROR WHILE DROPPING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(m->db) << ": " << *zErrMsg <<"\n";
 				else
 					log_file << "DROP CLAUSE FAILEDn\n";
 
-				log_file << "[ models::Model::DROP() ][" + getime() << "] SQL:";
+				log_file << "[ models::Model::DROP() ][" + getime() << "] SQL:";*/
 
 				sqlite3_free(zErrMsg);
 			}
@@ -565,7 +550,7 @@ namespace models
 	template<class Derived>
 	QuerySet<Derived>* Model<Derived>::insert()
 	{
-		return new QuerySet<Derived>(pk->first, "INSERT INTO ( ) VALUES ( );" );
+		return new QuerySet<Derived>(pk->first, "INSERT INTO () VALUES ();" );
 	}
 
 
@@ -584,16 +569,15 @@ namespace models
 
 		sqlaux = SQLquery.str();
 
-		first = (sqlaux.substr(sqlaux.find("("), 3).find(")") == std::string::npos);
-		
+		first = !(sqlaux.substr(sqlaux.find("("), 3).find(")") == std::string::npos);
 
 		if(sqlaux.substr(0, 6) == "INSERT") // INSERT INTO
 		{
 			insert_pos = sqlaux.find(")");
 			sqlaux.insert(insert_pos, std::string(first?" ":", ") + column);
-			SQLquery.clear();
-			SQLquery << sqlaux.substr(0, sqlaux.size()-2);
-			SQLquery << ", " << content << ");";
+			SQLquery.seekp(0);
+			SQLquery << sqlaux.substr(0, sqlaux.size()-(first?1:2));
+			SQLquery << (first?" ":", ") << content << " );";
 		} else  if(sqlaux.substr(0,6) == "UPDATE") { // UPDATE SET
 			insert_pos = sqlaux.rfind(" WHERE")+6;
 			sqlaux.insert(insert_pos, std::string(first?" ":" AND") + dm[column].sql);
@@ -616,12 +600,12 @@ namespace models
 		char** zErrMsg;
 		std::string temp = SQLquery.str();
 		
-		rc = sqlite3_exec(__table->db, temp.c_str(), NULL, NULL, zErrMsg);
+		rc = SQLITE_OK;//sqlite3_exec(__table->db, temp.c_str(), NULL, NULL, zErrMsg);
 
 		if(DLCPP_VERBOSE_LEVEL)
 		{
 			std::fstream log_file;
-			log_file.open(DLCPP_LOGFILE, std::fstream::in | std::fstream::app);
+			log_file.open(DLCPP_LOGFILE, std::fstream::out | std::fstream::app);
 
 			if(rc != SQLITE_OK)
 			{
@@ -639,8 +623,6 @@ namespace models
 
 			log_file.close();
 		}
-
-		std::cout << SQLquery << std::endl;
 
 		delete this;
 	}

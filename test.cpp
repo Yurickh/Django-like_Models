@@ -22,12 +22,12 @@ int main()
 		Abacate* a = new Abacate;
 		models::QuerySet<Abacate>* q;
 
-		/*q = a->insert();
+		q = a->insert();
 		
 		q->set("coluna1", 2);
 		q->set("coluna2", 3);
 
-		q->save();*/
+		q->save();
 
 		delete a;
 	}
