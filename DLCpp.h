@@ -68,7 +68,7 @@ namespace models
 	template<class Derived>
 	class QuerySet
 	{
-    private:
+    protected:
         std::stringstream SQLquery;
 		Model<Derived>* __table;
 		std::string __pk;
@@ -94,52 +94,23 @@ namespace models
 		void save(void);
 	};
 
-	template<typename value_type, class Derived>
-	class SingleSet : protected QuerySet<Derived>
+	template<class Derived>
+	class SingleSet : public QuerySet<Derived>
 	{
 	private:
-		typename DLCPP_MAP(value_type) value;
+		typename DLCPP_MAP(std::string) value;
 
 	public:
-		DLCPP_MAP(value_type)& getv(void) { return value; }
+		SingleSet(Model<Derived>* table, std::string pk, std::string sql) : QuerySet<Derived>(table, pk, sql){}
 
 		//OPERATORS
-		value_type                operator[](const std::string& index){ return value[index]; }
-		SingleSet<value_type, Derived>&    operator=(const SingleSet<value_type, Derived>& x){ value = x.getv(); return *this;}
-		SingleSet<value_type, Derived>&    operator=(const typename DLCPP_MAP(value_type)& x){ value = x; return *this;}
-
-		//ITERATORS
-		typename DLCPP_MAP_ITER(value_type) begin(void)   { return value.begin(); }
-		typename DLCPP_MAP_ITER(value_type) end(void) 	  { return value.end();   }
-		typename DLCPP_MAP_ITER(value_type) rbegin(void) { return value.rbegin();}
-		typename DLCPP_MAP_ITER(value_type) rend(void)   { return value.rend();  }
-
-		//CAPACITY
-		bool 			empty(void)     const { return value.empty();   }
-		unsigned int 	size(void)      const { return value.size();    }
-		unsigned int 	max_size(void)  const { return value.max_size();}
-
-		//INSERT
-		std::pair<typename DLCPP_MAP_ITER(value_type), value_type> insert(const value_type& val){ return value.insert(val); }
-		typename DLCPP_MAP_ITER(value_type)                   insert(typename DLCPP_MAP_ITER(value_type) pos, const value_type& val){ return value.insert(pos, val); }
-		// range insert is not currently supported
+		std::string	operator[](const std::string& index);
 
 		//ERASE
-		void 			erase(typename DLCPP_MAP_ITER(value_type) pos){ return value.erase(pos); }
 		unsigned int 	erase(const std::string& k){ return value.erase(k); }
-		void			erase(typename DLCPP_MAP_ITER(value_type) first, typename DLCPP_MAP_ITER(value_type) last){ return value.erase(first, last); }
 		void 			clear(void){ value.clear(); }
 
-		// Observers not currently supported
-
-		//OPERATIONS
-		typename DLCPP_MAP_ITER(value_type)			find(const std::string& k){ return value.find(k); }
-		unsigned int 			count(const std::string& k) const{ return value.count(k); }
-		typename DLCPP_MAP_ITER(value_type)			lower_bound(const std::string& k){ return value.lower_bound(k); }
-		typename DLCPP_MAP_ITER(value_type)			upper_bound(const std::string& k){ return value.upper_bound(k); }
-		// equal_range not currently supported
-
-		// get_allocator not currently supported
+		void save(void);
 	};
 /*
     template<typename value_type>
@@ -432,7 +403,7 @@ namespace models
         QuerySet* get(std::string requestr, bool);
         QuerySet* get(std::string requestr, std::string);
         QuerySet* get(std::string requestr, float);*/
-        QuerySet<Derived>* get(std::string requestr, int value);
+        SingleSet<Derived>* get(std::string requestr, int value);
 
         QuerySet<Derived>* insert(void);
     };
@@ -561,7 +532,7 @@ namespace models
 	}
 
 	template<class Derived>
-	QuerySet<Derived>* Model<Derived>::get(std::string requestr, int value)
+	SingleSet<Derived>* Model<Derived>::get(std::string requestr, int value)
 	{
 		std::list<std::string> rqlist;
 		std::list<std::string>::iterator it;
@@ -615,7 +586,7 @@ namespace models
 			temp.insert(pos, *it); pos+=it->size();
 		}
 
-		return new QuerySet<Derived>(this, pk->first, temp);
+		return new SingleSet<Derived>(this, pk->first, temp);
 	}
 
   /////////////////////////
@@ -694,5 +665,45 @@ namespace models
 
 		delete this;
 	}
+
+	template<class Derived>
+	std::string	SingleSet<Derived>::operator[](const std::string& index)
+	{
+		std::string temp = this->SQLquery.str();
+		size_t pos;
+		int rc;
+		char* zErrMsg;
+	
+		pos = temp.find("*");
+		temp.replace(pos, 1, index);
+
+		rc = sqlite3_exec(this->__table->db, temp.c_str(), NULL, NULL, &zErrMsg);
+
+		if(DLCPP_VERBOSE_LEVEL)
+		{
+			std::fstream log_file;
+			log_file.open(DLCPP_LOGFILE, std::fstream::out | std::fstream::app);
+
+			if(rc != SQLITE_OK)
+			{
+				if(DLCPP_VERBOSE_LEVEL == 2)
+					log_file << "[models::SingleSet<>.get][" << getime() << "] ERROR WHILE RETRIEVING DATA FROM TABLE. SQLITE ERROR CODE " << sqlite3_errcode(this->__table->db) << ": " << zErrMsg <<"\n";
+				else
+					log_file << "SELECT CLAUSE FAILED.\n";
+
+				log_file << "[models::SingleSet<>.get][" << getime() << "] SQL:";
+			}
+
+			log_file << "\n========\n" << temp << "\n========\n" <<std::endl;
+
+			log_file.close();
+		}
+
+		
+
+		return "oi";
+	}
+
+	
 };
 #endif

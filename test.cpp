@@ -20,11 +20,11 @@ int main()
 	try
 	{
 		Abacate* a = new Abacate;
-		models::QuerySet<Abacate>* q;
+		models::SingleSet<Abacate>* q;
 
 		q = a->get("coluna1__eq", 2);
 
-		//cout << "RETURNED VALUE:" << q["coluna2"] << endl;
+		cout << "RETURNED VALUE:" << (*q)["coluna2"] << endl;
 
 		delete a;
 	}
