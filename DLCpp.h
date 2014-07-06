@@ -32,6 +32,18 @@ namespace models
 	std::string tostring(float value);
 	std::string tostring(bool value);
 
+	int cb_single(void* p_data, int num_fields, char**p_fields, char**p_col_names)
+	{
+		std::string* temp = static_cast<std::string*>(p_data);
+
+		if(temp != NULL)
+			return 1;
+		
+		*temp = *p_fields;
+
+		return 0;
+	}
+
 	template<class Derived>
     class QuerySet;
 
@@ -667,17 +679,18 @@ namespace models
 	}
 
 	template<class Derived>
-	std::string	SingleSet<Derived>::operator[](const std::string& index)
+	std::string	SingleSet<Derived>::operator[](const std::string& index) throw (MultipleObjectsReturned, ObjectDoesNotExist)
 	{
 		std::string temp = this->SQLquery.str();
 		size_t pos;
 		int rc;
 		char* zErrMsg;
+		std::string retvalue;
 	
 		pos = temp.find("*");
 		temp.replace(pos, 1, index);
 
-		rc = sqlite3_exec(this->__table->db, temp.c_str(), NULL, NULL, &zErrMsg);
+		rc = sqlite3_exec(this->__table->db, temp.c_str(), cb_single, &retvalue, &zErrMsg);
 
 		if(DLCPP_VERBOSE_LEVEL)
 		{
@@ -701,7 +714,7 @@ namespace models
 
 		
 
-		return "oi";
+		return retvalue;
 	}
 
 	
