@@ -1,12 +1,4 @@
-[    models::Model()    ][Fri Jul  4 16:17:01 2014] CONNECTION SUCCESSFUL.
-[ models::Model::DROP() ][Fri Jul  4 16:17:01 2014] ERROR WHILE DROPPING TABLE. SQLITE ERROR CODE 1: 0
-[ models::Model::DROP() ][Fri Jul  4 16:17:01 2014] SQL:
-========
-DROP TABLE Abacate;
-========
-
-[   models::~Model()    ][Fri Jul  4 16:17:01 2014] SUCCESSFULLY DISCONNECTED.
-[    models::Model()    ][Fri Jul  4 16:17:29 2014] CONNECTION SUCCESSFUL.
+[    models::Model()    ][Sun Jul  6 00:29:12 2014] CONNECTION TO Abacate SUCCESSFUL.
 
 ========
 CREATE TABLE IF NOT EXISTS Abacate(
@@ -15,11 +7,18 @@ coluna2 INT(32) NOT NULL
 );
 ========
 
-[   models::~Model()    ][Fri Jul  4 16:17:29 2014] SUCCESSFULLY DISCONNECTED.
-[    models::Model()    ][Fri Jul  4 16:17:48 2014] CONNECTION SUCCESSFUL.
+[   models::~Model()    ][Sun Jul  6 00:29:12 2014] SUCCESSFULLY DISCONNECTED.
+[    models::Model()    ][Sun Jul  6 00:29:12 2014] CONNECTION TO Abacate SUCCESSFUL.
+[   models::~Model()    ][Sun Jul  6 00:29:12 2014] ERROR DISCONNECTING TO DATABASE; SQLITE ERROR CODE 7.
+[    models::Model()    ][Sun Jul  6 00:30:01 2014] CONNECTION TO Abacate SUCCESSFUL.
 
 ========
-DROP TABLE Abacate;
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 INT NOT NULL,
+coluna2 INT(32) NOT NULL
+);
 ========
 
-[   models::~Model()    ][Fri Jul  4 16:17:48 2014] SUCCESSFULLY DISCONNECTED.
+[   models::~Model()    ][Sun Jul  6 00:30:01 2014] SUCCESSFULLY DISCONNECTED.
+[    models::Model()    ][Sun Jul  6 00:30:01 2014] CONNECTION TO Abacate SUCCESSFUL.
+[   models::~Model()    ][Sun Jul  6 00:30:01 2014] ERROR DISCONNECTING TO DATABASE; SQLITE ERROR CODE 7.

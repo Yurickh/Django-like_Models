@@ -15,22 +15,23 @@ DLCPP_NEW_MODEL(Abacate)
 
 int main()
 {
+	Abacate::CREATE();
+
 	try
 	{
-		Abacate* a;
-		SQLITE_QUERYSET* q;
-		
-		Abacate::CREATE(); 
+		Abacate* a = new Abacate;
+		models::QuerySet<Abacate>* q;
 
-		q = a->insert();
+		/*q = a->insert();
 		
-		q.set("coluna1", 2);
-		q.set("coluna2", 3);
+		q->set("coluna1", 2);
+		q->set("coluna2", 3);
 
-		q->save();
-		
+		q->save();*/
+
+		delete a;
 	}
-	catch(exception e)
+	catch(std::runtime_error e)
 	{
 		printf("%s", e.what());
 	}
