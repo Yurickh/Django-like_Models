@@ -32,17 +32,7 @@ namespace models
 	std::string tostring(float value);
 	std::string tostring(bool value);
 
-	int cb_single(void* p_data, int num_fields, char**p_fields, char**p_col_names)
-	{
-		std::string* temp = static_cast<std::string*>(p_data);
-
-		if(temp != NULL)
-			return 1;
-		
-		*temp = *p_fields;
-
-		return 0;
-	}
+	int cb_single(void* p_data, int num_fields, char**p_fields, char**p_col_names);
 
 	template<class Derived>
     class QuerySet;
@@ -58,10 +48,10 @@ namespace models
 		std::string CAUSE;
 
 	public:
-		BaseException(std::string why)
+		BaseException(std::string why="")
 		{
 			CAUSE = why;
-		}		
+		}
 
 		std::string what()
 		{
@@ -69,8 +59,12 @@ namespace models
 		}
 	};
 
-	class MultipleObjectsReturned 	: public BaseException {};
-	class ObjectDoesNotExist 		: public BaseException {};
+	class MultipleObjectsReturned 	: public BaseException {
+        public: 
+        MultipleObjectsReturned(std::string why="") : BaseException(why){}};
+	class ObjectDoesNotExist 		: public BaseException {
+        public: 
+        ObjectDoesNotExist(std::string why="") : BaseException(why){}};
 
 	std::string getime(void);
 
@@ -109,38 +103,101 @@ namespace models
 	template<class Derived>
 	class SingleSet : public QuerySet<Derived>
 	{
-	private:
-		typename DLCPP_MAP(std::string) value;
+    private:
+        typename DLCPP_MAP(std::string) value;
 
-	public:
-		SingleSet(Model<Derived>* table, std::string pk, std::string sql) : QuerySet<Derived>(table, pk, sql){}
+    public:
+        SingleSet(Model<Derived>* __table, std::string pk, std::string sql) throw (MultipleObjectsReturned, ObjectDoesNotExist) : QuerySet<Derived>(__table, pk, sql)
+        {
+            std::string temp = this->SQLquery.str();
+            size_t pos;
+            int rc;
+            char* zErrMsg;
 
-		//OPERATORS
-		std::string	operator[](const std::string& index);
+            rc = sqlite3_exec(this->__table->db, temp.c_str(), cb_single, &value, &zErrMsg);
 
-		//ERASE
-		unsigned int 	erase(const std::string& k){ return value.erase(k); }
-		void 			clear(void){ value.clear(); }
+            if(rc == SQLITE_ABORT)
+                throw MultipleObjectsReturned();
 
-		void save(void);
-	};
+            if(value.empty())
+                throw ObjectDoesNotExist();
+
+            if(DLCPP_VERBOSE_LEVEL)
+            {
+                std::fstream log_file;
+                log_file.open(DLCPP_LOGFILE, std::fstream::out | std::fstream::app);
+
+                if(rc != SQLITE_OK)
+                {
+                    if(DLCPP_VERBOSE_LEVEL == 2)
+                        log_file << "[models::SingleSet<>.get][" << getime() << "] ERROR WHILE RETRIEVING DATA FROM TABLE. SQLITE ERROR CODE " << sqlite3_errcode(this->__table->db) << ": " << zErrMsg <<"\n";
+                    else
+                        log_file << "SELECT CLAUSE FAILED.\n";
+
+                    log_file << "[models::SingleSet<>.get][" << getime() << "] SQL:";
+                }
+
+                log_file << "\n========\n" << temp << "\n========\n" <<std::endl;
+
+                log_file.close();
+            }
+        }
+
+        //OPERATORS
+        std::string         operator[](const std::string& index){ return value[index]; }
+        SingleSet<Derived>& operator= (const SingleSet<Derived>& x){ value = x.getv(); return *this;}
+        SingleSet<Derived>& operator= (const typename DLCPP_MAP(std::string)& x){ value = x; return *this;}
+
+        //ITERATORS
+        typename DLCPP_MAP_ITER(std::string) begin(void)  { return value.begin(); }
+        typename DLCPP_MAP_ITER(std::string) end(void)    { return value.end();   }
+        typename DLCPP_MAP_ITER(std::string) rbegin(void) { return value.rbegin();}
+        typename DLCPP_MAP_ITER(std::string) rend(void)   { return value.rend();  }
+
+        //CAPACITY
+        bool            empty(void)     const { return value.empty();   }
+        unsigned int    size(void)      const { return value.size();    }
+        unsigned int    max_size(void)  const { return value.max_size();}
+
+        //INSERT
+        std::pair<typename DLCPP_MAP_ITER(std::string), std::string> insert(const std::string& val){ return value.insert(val); }
+        typename DLCPP_MAP_ITER(std::string)                         insert(typename DLCPP_MAP_ITER(std::string) pos, const std::string& val){ return value.insert(pos, val); }
+        // range insert is not currently supported
+
+        //ERASE
+        void            erase(typename DLCPP_MAP_ITER(std::string) pos){ return value.erase(pos); }
+        unsigned int    erase(const std::string& k){ return value.erase(k); }
+        void            erase(typename DLCPP_MAP_ITER(std::string) first, typename DLCPP_MAP_ITER(std::string) last){ return value.erase(first, last); }
+        void            clear(void){ value.clear(); }
+
+        // Observers not currently supported
+
+        //OPERATIONS
+        typename DLCPP_MAP_ITER(std::string)         find(const std::string& k){ return value.find(k); }
+        unsigned int            count(const std::string& k) const{ return value.count(k); }
+        typename DLCPP_MAP_ITER(std::string)         lower_bound(const std::string& k){ return value.lower_bound(k); }
+        typename DLCPP_MAP_ITER(std::string)         upper_bound(const std::string& k){ return value.upper_bound(k); }
+        // equal_range not currently supported
+
+        // get_allocator not currently supported
+    };
 /*
-    template<typename value_type>
+    template<typename std::string>
     class MultipleSet : protected QuerySet
     {
     private:
-        DLCPP_LIST(value_type) value;
+        DLCPP_LIST(std::string) value;
 
     public:
         //OPERATORS
-        MultipleSet<value_type>&    operator=(const MultipleSet<value_type>& x);
-        MultipleSet<value_type>&    operator=(const DLCPP_LIST(value_type)& x);
+        MultipleSet<std::string>&    operator=(const MultipleSet<std::string>& x);
+        MultipleSet<std::string>&    operator=(const DLCPP_LIST(std::string)& x);
 
         //ITERATORS
-        DLCPP_LIST_ITER(value_type)    begin(void);
-        DLCPP_LIST_ITER(value_type)    end(void);
-        DLCPP_LIST_ITER(value_type)    rbegin(void);
-        DLCPP_LIST_ITER(value_type)    rend(void);
+        DLCPP_LIST_ITER(std::string)    begin(void);
+        DLCPP_LIST_ITER(std::string)    end(void);
+        DLCPP_LIST_ITER(std::string)    rbegin(void);
+        DLCPP_LIST_ITER(std::string)    rend(void);
 
         //CAPACITY
         bool            empty(void)     const;
@@ -148,31 +205,31 @@ namespace models
         unsigned int    max_size(void)  const;
 
         //ELEMENT ACCESS
-        value_type& front(void);
-        value_type& back(void);
+        std::string& front(void);
+        std::string& back(void);
 
         //MODIFIERS
-        void push_front(const value_type& val);
+        void push_front(const std::string& val);
         void pop_front(void);
-        void push_back(const value_type& val);
+        void push_back(const std::string& val);
         void pop_back(void);
 
         //INSERT
-        DLCPP_LIST_ITER(value_type) insert(DLCPP_LIST_ITER(value_type) position, const value_type& val);
-        void            insert(DLCPP_LIST_ITER(value_type) position, unsigned int n, const value_type& val);
+        DLCPP_LIST_ITER(std::string) insert(DLCPP_LIST_ITER(std::string) position, const std::string& val);
+        void            insert(DLCPP_LIST_ITER(std::string) position, unsigned int n, const std::string& val);
         //range insert not currently supported
 
         //ERASE
-        DLCPP_LIST_ITER(value_type) erase(DLCPP_LIST_ITER(value_type) position);
-        DLCPP_LIST_ITER(value_type) erase(DLCPP_LIST_ITER(value_type) first, DLCPP_LIST_ITER(value_type) last);
+        DLCPP_LIST_ITER(std::string) erase(DLCPP_LIST_ITER(std::string) position);
+        DLCPP_LIST_ITER(std::string) erase(DLCPP_LIST_ITER(std::string) first, DLCPP_LIST_ITER(std::string) last);
         void            clear(void);
 
         //OPERATIONS
-        void splice(DLCPP_LIST_ITER(value_type) position, DLCPP_LIST(value_type)& x);
-        void splice(DLCPP_LIST_ITER(value_type) position, DLCPP_LIST(value_type)& x, DLCPP_LIST_ITER(value_type) i);
-        void splice(DLCPP_LIST_ITER(value_type) position, DLCPP_LIST(value_type)& x, DLCPP_LIST_ITER(value_type) first, DLCPP_LIST_ITER(value_type) last);
-        void remove(const value_type& val);
-        void merge(DLCPP_LIST(value_type)& x);
+        void splice(DLCPP_LIST_ITER(std::string) position, DLCPP_LIST(std::string)& x);
+        void splice(DLCPP_LIST_ITER(std::string) position, DLCPP_LIST(std::string)& x, DLCPP_LIST_ITER(std::string) i);
+        void splice(DLCPP_LIST_ITER(std::string) position, DLCPP_LIST(std::string)& x, DLCPP_LIST_ITER(std::string) first, DLCPP_LIST_ITER(std::string) last);
+        void remove(const std::string& val);
+        void merge(DLCPP_LIST(std::string)& x);
         void sort(void);
         void reverse(void);
         // remove_if and unique not currently supported
@@ -677,46 +734,6 @@ namespace models
 
 		delete this;
 	}
-
-	template<class Derived>
-	std::string	SingleSet<Derived>::operator[](const std::string& index) throw (MultipleObjectsReturned, ObjectDoesNotExist)
-	{
-		std::string temp = this->SQLquery.str();
-		size_t pos;
-		int rc;
-		char* zErrMsg;
-		std::string retvalue;
-	
-		pos = temp.find("*");
-		temp.replace(pos, 1, index);
-
-		rc = sqlite3_exec(this->__table->db, temp.c_str(), cb_single, &retvalue, &zErrMsg);
-
-		if(DLCPP_VERBOSE_LEVEL)
-		{
-			std::fstream log_file;
-			log_file.open(DLCPP_LOGFILE, std::fstream::out | std::fstream::app);
-
-			if(rc != SQLITE_OK)
-			{
-				if(DLCPP_VERBOSE_LEVEL == 2)
-					log_file << "[models::SingleSet<>.get][" << getime() << "] ERROR WHILE RETRIEVING DATA FROM TABLE. SQLITE ERROR CODE " << sqlite3_errcode(this->__table->db) << ": " << zErrMsg <<"\n";
-				else
-					log_file << "SELECT CLAUSE FAILED.\n";
-
-				log_file << "[models::SingleSet<>.get][" << getime() << "] SQL:";
-			}
-
-			log_file << "\n========\n" << temp << "\n========\n" <<std::endl;
-
-			log_file.close();
-		}
-
-		
-
-		return retvalue;
-	}
-
 	
 };
 #endif

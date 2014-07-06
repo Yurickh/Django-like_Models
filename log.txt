@@ -1,4 +1,4 @@
-[    models::Model()    ][Sun Jul  6 06:28:37 2014] CONNECTION TO Abacate SUCCESSFUL.
+[    models::Model()    ][Sun Jul  6 07:15:33 2014] CONNECTION TO Abacate SUCCESSFUL.
 
 ========
 CREATE TABLE IF NOT EXISTS Abacate(
@@ -9,7 +9,7 @@ coluna2 INT(32) NOT NULL
 
 
 ========
-SELECT coluna2  FROM Abacate WHERE coluna1= 2
+SELECT *  FROM Abacate WHERE coluna1= 2
 ========
 
-[   models::~Model()    ][Sun Jul  6 06:28:37 2014] SUCCESSFULLY DISCONNECTED.
+[   models::~Model()    ][Sun Jul  6 07:15:33 2014] SUCCESSFULLY DISCONNECTED.

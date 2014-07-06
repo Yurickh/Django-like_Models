@@ -72,3 +72,16 @@ std::string models::tostring(float value)
 
 	return temp.str();
 }
+
+int models::cb_single(void* p_data, int num_fields, char**p_fields, char**p_col_names)
+{
+		DLCPP_MAP(std::string)* temp = static_cast<DLCPP_MAP(std::string)*>(p_data);
+
+		if(!temp->empty())
+			return 1;
+		
+        for(int i=0; i<num_fields; ++i)
+            (*temp)[p_col_names[i]] = p_fields[i];
+
+		return 0;
+	}
