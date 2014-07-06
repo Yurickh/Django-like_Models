@@ -33,6 +33,7 @@ namespace models
 	std::string tostring(int value);
 	std::string tostring(float value);
 	std::string tostring(bool value);
+    std::string tostring(std::string value);
 
     int cb_single(void* p_data, int num_fields, char**p_fields, char**p_col_names);
     int cb_multiple(void* p_data, int num_fields, char**p_fields, char **p_col_names);
@@ -89,6 +90,9 @@ namespace models
         Model<Derived>* __table;
         std::string __pk;
 
+        template<typename intype>
+        void set_g(std::string column, intype content);
+
     public:
         QuerySet(Model<Derived>* d, std::string pk, std::string sql)
         {
@@ -98,12 +102,13 @@ namespace models
         }
 		
         std::string pk(void);
-/*
+
         void set(std::string column, bool           content);
         void set(std::string column, std::string    content);
-        void set(std::string column, float          content);*/
+        void set(std::string column, float          content);
         void set(std::string column, int            content);
-//        void set(std::string column, QuerySet&      content);
+        void set(std::string column, const char*    content);
+        //void set(std::string column, QuerySet&      content);
 
 //        void remove(void);
 
@@ -308,8 +313,6 @@ namespace models
     {
     public:
         bool __notNull;
-        bool __blank;
-        std::list<std::list< std::string> > __choices;
         std::string __db_column;
         bool __db_index;
         bool __primary_key;
@@ -317,53 +320,50 @@ namespace models
 
         std::string sql;
 
-        /*Field& null(bool null);
-        Field& blank(bool blank);
-        Field& choices(const std::map<std::string, std::string>&);
+        Field& null(bool null);
         Field& db_column(std::string);
         Field& db_index(bool);
         Field& primary_key(bool);
-        Field& unique(bool);*/
+        Field& unique(bool);
     };
 
     /** Para campos booleanos (TRUE-FALSE) 
         ENUM('TRUE', 'FALSE') 
-        *
+        */
     class BooleanField : public Field
     {
         bool __standard;
 
     public:
-        bool returnObj;
+        BooleanField(void);
         BooleanField& standard(bool);
     };
 
     /** Para campos de texto.
         max_length é necessário para a construção deste campo. 
         VARCHAR(max_length)
-        *
+        */
     class CharField : public Field
     {
         std::string __standard;
         int __max_length;
 
     public:
-        std::string returnObj;
+        CharField(void);
         CharField& standard(std::string);
         CharField& max_length(int);
     };
     
     /** Para campos de números reais. 
         FLOAT(size, d)
-        *
+        */
     class FloatField : public Field
     {
         float __standard;
 
     public:
-        float returnObj;
-        FloatField& size(int);
-        FloatField& d(int);
+        FloatField(void);
+        FloatField& size_d(int, int);
         FloatField& standard(float);
     };
 
@@ -393,7 +393,7 @@ namespace models
     public:
         ForeignKey(const Model&);
         ForeignKey& related_name(std::string);
-        ForeignKey& to_field(const Field&);
+        ForeignKey& to_field(std::string);
         ForeignKey& on_delete(std::string);
     };
 
@@ -531,16 +531,18 @@ namespace models
 
         void retrieve(DLCPP_FMAP&, std::string&);
 
-        /*QuerySet* filter(std::stringstream requestr, bool);
-        QuerySet* filter(std::stringstream requestr, std::string);
-        QuerySet* filter(std::stringstream requestr, float);
-        */
-        MultipleSet<Derived>* filter(std::string requestr, int);
+        MultipleSet<Derived>* filter(std::string, bool);
+        MultipleSet<Derived>* filter(std::string, std::string);
+        MultipleSet<Derived>* filter(std::string, float);
+        MultipleSet<Derived>* filter(std::string, int);
+        MultipleSet<Derived>* filter(std::string, const char*);
 
-        /*QuerySet* get(std::string requestr, bool);
-        QuerySet* get(std::string requestr, std::string);
-        QuerySet* get(std::string requestr, float);*/
-        SingleSet<Derived>* get(std::string requestr, int value);
+        SingleSet<Derived>* get(std::string, bool);
+        SingleSet<Derived>* get(std::string, std::string);
+        SingleSet<Derived>* get(std::string, float);
+        SingleSet<Derived>* get(std::string, int);
+        SingleSet<Derived>* get(std::string, const char*);
+        
 
         QuerySet<Derived>* insert(void);
     };
@@ -674,10 +676,55 @@ namespace models
         return select<SingleSet<Derived>, int>(requestr, value);
     }
 
+
+    template<class Derived>
+    SingleSet<Derived>* Model<Derived>::get(std::string requestr, bool value)
+    {
+        return select<SingleSet<Derived>, bool>(requestr, value);
+    }
+
+
+    template<class Derived>
+    SingleSet<Derived>* Model<Derived>::get(std::string requestr, float value)
+    {
+        return select<SingleSet<Derived>, float>(requestr, value);
+    }
+
+
+    template<class Derived>
+    SingleSet<Derived>* Model<Derived>::get(std::string requestr, std::string value)
+    {
+        return select<SingleSet<Derived>, std::string>(requestr, value);
+    }
+
+    template<class Derived>
+    SingleSet<Derived>* Model<Derived>::get(std::string requestr, const char* value)
+    {
+        return select<SingleSet<Derived>, std::string>(requestr, std::string(value));
+    }
+
     template<class Derived>
     MultipleSet<Derived>* Model<Derived>::filter(std::string requestr, int value)
     {
         return select<MultipleSet<Derived>, int>(requestr, value);
+    }
+
+    template<class Derived>
+    MultipleSet<Derived>* Model<Derived>::filter(std::string requestr, bool value)
+    {
+        return select<MultipleSet<Derived>, bool>(requestr, value);
+    }
+
+    template<class Derived>
+    MultipleSet<Derived>* Model<Derived>::filter(std::string requestr, float value)
+    {
+        return select<MultipleSet<Derived>, float>(requestr, value);
+    }
+
+    template<class Derived>
+    MultipleSet<Derived>* Model<Derived>::filter(std::string requestr, std::string value)
+    {
+        return select<MultipleSet<Derived>, std::string>(requestr, value);
     }
 
     template<class Derived>
@@ -744,7 +791,8 @@ namespace models
 /////////////////////////
 
     template<class Derived>
-    void QuerySet<Derived>::set(std::string column, int content)
+    template<typename intype>
+    void QuerySet<Derived>::set_g(std::string column, intype content)
     {
         DLCPP_FMAP dm;
         std::string sqlaux, tname;
@@ -763,10 +811,14 @@ namespace models
         {
             insert_pos = sqlaux.find(")");
             sqlaux.insert(insert_pos, std::string(first?" ":", ") + column);
+            insert_pos = sqlaux.rfind(")");
+            sqlaux.insert(insert_pos, std::string(first?" '":", '"));
+            insert_pos = sqlaux.rfind(")");
+            sqlaux.insert(insert_pos, tostring(content) + "'");
             SQLquery.seekp(0);
-            SQLquery << sqlaux.substr(0, sqlaux.size()-(first?1:2));
-            SQLquery << (first?" '":", '") << content << "' );";
-        } else  if(sqlaux.substr(0,6) == "UPDATE") { // UPDATE SET
+            SQLquery << sqlaux;
+        } else  if(sqlaux.substr(0,6) == "UPDATE") 
+        { // UPDATE SET
             insert_pos = sqlaux.rfind(" WHERE")+6;
             sqlaux.insert(insert_pos, std::string(first?" ":" AND") + dm[column].sql);
 
@@ -779,6 +831,36 @@ namespace models
             SQLquery.seekp(insert_pos);
             SQLquery << content << sqlaux.substr(insert_pos, sqlaux.size());
         }
+    }
+
+    template<class Derived>
+    void QuerySet<Derived>::set(std::string column, int content)
+    {
+        this->set_g<int>(column, content);
+    }
+
+    template<class Derived>
+    void QuerySet<Derived>::set(std::string column, float content)
+    {
+        this->set_g<float>(column, content);
+    }
+
+    template<class Derived>
+    void QuerySet<Derived>::set(std::string column, std::string content)
+    {
+        this->set_g<std::string>(column, content);
+    }
+
+    template<class Derived>
+    void QuerySet<Derived>::set(std::string column, bool content)
+    {
+        this->set_g<bool>(column, content);
+    }
+
+    template<class Derived>
+    void QuerySet<Derived>::set(std::string column, const char* content)
+    {
+        this->set_g<std::string>(column, std::string(content));
     }
 
     template<class Derived>

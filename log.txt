@@ -11,3 +11,167 @@ coluna2 INT(32) NOT NULL
 SELECT *  FROM Abacate WHERE coluna1> '0'
 ========
 
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 INT NOT NULL,
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+SELECT *  FROM Abacate WHERE coluna1> '0'
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 INT NOT NULL,
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 INT NOT NULL,
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+DROP TABLE Abacate;
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( '1' , '4' );
+========
+
+
+========
+INSERT INTO Abacate ( coluna2) VALUES ( '24' );
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+SELECT *  FROM Abacate WHERE coluna2> '0'
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( '1' , '4' );
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( '1' , '4' );
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( 'TRUE', '4')
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( 'TRUE', '4')
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( 'TRUE', '4')
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( 'Yurick', '4')
+========
+
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 VARCHAR(32) NOT NULL DEFAULT 'HELOU',
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( 'Yurick', '4')
+========
+

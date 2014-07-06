@@ -8,7 +8,7 @@ DLCPP_NEW_MODEL(Abacate)
 {
 	public: Abacate()
 	{
-		column["coluna1"] = models::IntegerField();
+		column["coluna1"] = models::CharField().max_length(32).standard("HELOU");
 		column["coluna2"] = models::IntegerField().size(32);
 
 		CREATE();
@@ -17,29 +17,15 @@ DLCPP_NEW_MODEL(Abacate)
 
 int main()
 {
-	Abacate* a = new Abacate;
-	try
-	{
-		models::MultipleSet<Abacate>* q;
+	Abacate* a = new Abacate();
+    models::QuerySet<Abacate>* q;
 
-		q = a->filter("coluna1__gt", 0);
+    q = a->insert();
 
-		for(DLCPP_LIST_ITER it=q->begin(); it != q->end(); ++it)
-			cout << "RET:" << (*it)["coluna2"] << endl;
-	}
-	catch(std::runtime_error e)
-	{
-		cout << e.what();
-	}
-	catch(models::ObjectDoesNotExist e)
-	{
-		cout << "NOOP";
-	}
-	catch(models::MultipleObjectsReturned e)
-	{
-		cout << "MUL";
-	}
+    q->set("coluna1", "Yurick");
+    q->set("coluna2", 4);
 
-	delete a;
+    q->save();
+
 	return 0;
 }
