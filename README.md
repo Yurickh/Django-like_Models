@@ -34,11 +34,10 @@ In order to create a table, you must:
         {
             column["id"] = models::IntegerField().primary_key();
             column["income"] = models::FloatField().standard(12.4).null(True);
+
+            CREATE();
         }
     };
-
-    //Inside your main:
-    ExampleModel::CREATE();
     ```
 
 ### DROP TABLE

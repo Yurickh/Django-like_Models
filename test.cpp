@@ -10,13 +10,13 @@ DLCPP_NEW_MODEL(Abacate)
 	{
 		column["coluna1"] = models::IntegerField();
 		column["coluna2"] = models::IntegerField().size(32);
+
+		CREATE();
 	}
 };
 
 int main()
 {
-	Abacate::CREATE();
-
 	try
 	{
 		Abacate* a = new Abacate;

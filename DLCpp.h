@@ -66,19 +66,15 @@ namespace models
 	{
     private:
         std::stringstream SQLquery;
-		Derived* __table;
+		Model<Derived>* __table;
 		std::string __pk;
 
     public:
-        QuerySet(std::string pk, std::string sql)
+        QuerySet(Model<Derived>* d, std::string pk, std::string sql)
 		{
-			__table = new Derived();
+			__table = d;
 			SQLquery << sql.substr(0, sql.size() - sql.substr(sql.find(";"), sql.size()).size());
 			this->__pk = pk;
-		}
-		~QuerySet()
-		{
-			delete __table;
 		}
 		
 		std::string pk(void);
@@ -342,12 +338,12 @@ namespace models
 
 	public:
 		sqlite3* db;
-		static std::pair<std::string, Field*>* pk;
+		std::pair<std::string, Field*>* pk;
 
 		~Model(void){ 
 			int err;
 
-			err = SQLITE_OK;//sqlite3_close(db); 
+			err = sqlite3_close(db); 
 			db = NULL;
 
 			if(DLCPP_VERBOSE_LEVEL == 2)
@@ -375,6 +371,8 @@ namespace models
 		{
 			int err;
 			std::string classname;
+
+			pk = NULL;
 
 			// REF INSTANTIATION
 			classname = __PRETTY_FUNCTION__;
@@ -416,7 +414,8 @@ namespace models
 			}
 		}
 
-		static void CREATE(void);
+		void CREATE(void);
+
         static void DROP(void);
 
 		void retrieve(DLCPP_MAP(Field)&, std::string&);
@@ -445,17 +444,12 @@ namespace models
 	void Model<Derived>::CREATE()
 	{
 		DLCPP_MAP_ITER(Field) it;
-		DLCPP_MAP(Field) column;
 		std::stringstream createStt;
 		std::string temp;
-		std::string ref;
 		char** zErrMsg;
-		models::Model<Derived>* m;
 		int err;
 
-		m = new Derived; // already opens a connection with database through db;
-
-		m->retrieve(column, ref);
+		std::cout << "Model<>.CREATE();" << std::endl;
 
 		createStt << "CREATE TABLE IF NOT EXISTS " << ref << "(\n";
 
@@ -477,7 +471,7 @@ namespace models
 
 		temp = createStt.str();
 
-		err = sqlite3_exec(m->db, temp.c_str(), NULL, NULL, zErrMsg);
+		err = sqlite3_exec(this->db, temp.c_str(), NULL, NULL, zErrMsg);
 
 		if(DLCPP_VERBOSE_LEVEL)
 		{
@@ -488,7 +482,7 @@ namespace models
 			if(err != SQLITE_OK)
 			{
 				if(DLCPP_VERBOSE_LEVEL == 2)
-					log_file << "[models::Model::CREATE()][" << getime() << "] ERROR WHILE CREATING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(m->db) << *zErrMsg << ".\n";
+					log_file << "[models::Model::CREATE()][" << getime() << "] ERROR WHILE CREATING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(this->db) << *zErrMsg << ".\n";
 				else
 					log_file << "CREATE CLAUSE FAILED.\n";
 
@@ -496,13 +490,11 @@ namespace models
 			}
 			
 			log_file << "\n========\n" << temp << "\n========\n" <<std::endl;
-
-			sqlite3_free(zErrMsg);
 			
 			log_file.close();
 		}
 
-		delete m; // closes connection
+		std::cout << temp << std::endl;
 	}
 
 	template<class Derived>
@@ -514,6 +506,8 @@ namespace models
 		Model<Derived>* m = new Derived;
 		DLCPP_MAP(Field) f;
 		int rc;
+
+		std::cout << "Model<>::DROP();" << std::endl;
 
 		m->retrieve(f, temp);
 
@@ -529,14 +523,12 @@ namespace models
 
 			if(rc != SQLITE_OK)
 			{
-				/*if(DLCPP_VERBOSE_LEVEL == 2)
+				if(DLCPP_VERBOSE_LEVEL == 2)
 					log_file << "[ models::Model::DROP() ][" + getime() << "] ERROR WHILE DROPPING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(m->db) << ": " << *zErrMsg <<"\n";
 				else
 					log_file << "DROP CLAUSE FAILEDn\n";
 
-				log_file << "[ models::Model::DROP() ][" + getime() << "] SQL:";*/
-
-				sqlite3_free(zErrMsg);
+				log_file << "[ models::Model::DROP() ][" + getime() << "] SQL:";
 			}
 
 			log_file << "\n========\n" << temp << "\n========\n" <<std::endl;
@@ -544,18 +536,19 @@ namespace models
 			log_file.close();
 		}
 
+		std::cout << temp << std::endl;
+
 		delete m;
 	}
 
 	template<class Derived>
 	QuerySet<Derived>* Model<Derived>::insert()
 	{
-		return new QuerySet<Derived>(pk->first, "INSERT INTO () VALUES ();" );
+		std::string sql = "INSERT INTO ";
+		sql.append(ref);
+		sql.append(" () VALUES ();");
+		return new QuerySet<Derived>(this, pk->first, sql );
 	}
-
-
-	template<class Derived>
-	std::pair<std::string, Field*>* Model<Derived>::pk = NULL;
 
 	template<class Derived>
 	void QuerySet<Derived>::set(std::string column, int content)
@@ -564,6 +557,8 @@ namespace models
 		std::string sqlaux, tname;
 		size_t insert_pos;
 		bool first;
+
+		std::cout << "QuerySet<>.set();" << std::endl;
 
 		__table->retrieve(dm, tname);
 
@@ -577,7 +572,7 @@ namespace models
 			sqlaux.insert(insert_pos, std::string(first?" ":", ") + column);
 			SQLquery.seekp(0);
 			SQLquery << sqlaux.substr(0, sqlaux.size()-(first?1:2));
-			SQLquery << (first?" ":", ") << content << " );";
+			SQLquery << (first?" '":", '") << content << "' );";
 		} else  if(sqlaux.substr(0,6) == "UPDATE") { // UPDATE SET
 			insert_pos = sqlaux.rfind(" WHERE")+6;
 			sqlaux.insert(insert_pos, std::string(first?" ":" AND") + dm[column].sql);
@@ -597,10 +592,13 @@ namespace models
 	void QuerySet<Derived>::save()
 	{
 		int rc;
-		char** zErrMsg;
+		char* zErrMsg;
 		std::string temp = SQLquery.str();
+
+		std::cout << "QuerySet<>.save();" << std::endl;
+		std::cout << temp << std::endl;
 		
-		rc = SQLITE_OK;//sqlite3_exec(__table->db, temp.c_str(), NULL, NULL, zErrMsg);
+		rc = sqlite3_exec(__table->db, temp.c_str(), NULL, NULL, &zErrMsg);
 
 		if(DLCPP_VERBOSE_LEVEL)
 		{
@@ -610,13 +608,11 @@ namespace models
 			if(rc != SQLITE_OK)
 			{
 				if(DLCPP_VERBOSE_LEVEL == 2)
-					log_file << "[models::QuerySet<>.save][" << getime() << "] ERROR WHILE MODIFYING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(__table->db) << ": " << *zErrMsg <<"\n";
+					log_file << "[models::QuerySet<>.save][" << getime() << "] ERROR WHILE MODIFYING TABLE. SQLITE ERROR CODE " << sqlite3_errcode(__table->db) << ": " << zErrMsg <<"\n";
 				else
 					log_file << "ERROR WHILE MODIFYING TABLE.\n";
 
 				log_file << "[models::QuerySet<>.save][" << getime() << "] SQL:";
-
-				sqlite3_free(zErrMsg);
 			}
 
 			log_file << "\n========\n" << temp << "\n========\n" <<std::endl;

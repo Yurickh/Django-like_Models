@@ -1,4 +1,4 @@
-[    models::Model()    ][Sun Jul  6 02:39:01 2014] CONNECTION TO Abacate SUCCESSFUL.
+[    models::Model()    ][Sun Jul  6 03:47:28 2014] CONNECTION TO Abacate SUCCESSFUL.
 
 ========
 CREATE TABLE IF NOT EXISTS Abacate(
@@ -7,13 +7,41 @@ coluna2 INT(32) NOT NULL
 );
 ========
 
-[   models::~Model()    ][Sun Jul  6 02:39:01 2014] SUCCESSFULLY DISCONNECTED.
-[    models::Model()    ][Sun Jul  6 02:39:01 2014] CONNECTION TO Abacate SUCCESSFUL.
-[    models::Model()    ][Sun Jul  6 02:39:01 2014] CONNECTION TO Abacate SUCCESSFUL.
-
+[models::QuerySet<>.save][Sun Jul  6 03:47:28 2014] ERROR WHILE MODIFYING TABLE. SQLITE ERROR CODE 1: n
+[models::QuerySet<>.save][Sun Jul  6 03:47:28 2014] SQL:
 ========
-INSERT INTO ( coluna1, coluna2) VALUES ( 2 , 3 );
+INSERT INTO ( coluna1, coluna2) VALUES ( '2' , '3' );
 ========
 
-[   models::~Model()    ][Sun Jul  6 02:39:01 2014] SUCCESSFULLY DISCONNECTED.
-[   models::~Model()    ][Sun Jul  6 02:39:01 2014] SUCCESSFULLY DISCONNECTED.
+[   models::~Model()    ][Sun Jul  6 03:47:28 2014] SUCCESSFULLY DISCONNECTED.
+[    models::Model()    ][Sun Jul  6 03:47:54 2014] CONNECTION TO Abacate SUCCESSFUL.
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 INT NOT NULL,
+coluna2 INT(32) NOT NULL
+);
+========
+
+[models::QuerySet<>.save][Sun Jul  6 03:47:54 2014] ERROR WHILE MODIFYING TABLE. SQLITE ERROR CODE 1: near "(": syntax error
+[models::QuerySet<>.save][Sun Jul  6 03:47:54 2014] SQL:
+========
+INSERT INTO ( coluna1, coluna2) VALUES ( '2' , '3' );
+========
+
+[   models::~Model()    ][Sun Jul  6 03:47:54 2014] SUCCESSFULLY DISCONNECTED.
+[    models::Model()    ][Sun Jul  6 03:49:52 2014] CONNECTION TO Abacate SUCCESSFUL.
+
+========
+CREATE TABLE IF NOT EXISTS Abacate(
+coluna1 INT NOT NULL,
+coluna2 INT(32) NOT NULL
+);
+========
+
+
+========
+INSERT INTO Abacate ( coluna1, coluna2) VALUES ( '2' , '3' );
+========
+
+[   models::~Model()    ][Sun Jul  6 03:49:52 2014] SUCCESSFULLY DISCONNECTED.
