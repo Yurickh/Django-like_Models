@@ -21,7 +21,7 @@ In order to create a table, you must:
 
 1. Create a subclass of models::Model, as follows:
 
-    `DLCPP_NEW_MODEL(ExampleModel);`
+    `DLCPP_NEW_MODEL(ExampleModel);` 
 
 2. Create the columns as models::Field:
 

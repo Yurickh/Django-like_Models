@@ -729,7 +729,7 @@ namespace models
 		}
 
 		return new retClass(this, pk->first, temp);
-	}
+	} 
 
   /////////////////////////
  // QUERYSET			//

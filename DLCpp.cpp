@@ -84,7 +84,7 @@ int models::cb_single(void* p_data, int num_fields, char**p_fields, char**p_col_
         (*temp)[p_col_names[i]] = p_fields[i];
 
 		return 0;
-}
+} 
 
 int models::cb_multiple(void* p_data, int num_fields, char**p_fields, char **p_col_names)
 {
