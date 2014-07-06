@@ -40,6 +40,8 @@ In order to create a table, you must:
     };
     ```
 
+3. Never forget the `CREATE()` call at the end of your constructor! It's the responsible for inputting your data to the database.
+
 ### DROP TABLE
 
 Use the DROP() static method:
@@ -53,8 +55,8 @@ ExampleModel::DROP();
 To retrieve a set of data, use the .filter() method. e.g.:
 
 ```c++
-models::Model* m;
-models::QuerySet* ret;
+ExampleModel* m;
+models::QuerySet<ExampleModel>* ret;
 
 m = new ExampleModel;
 ret = m->filter("income__gt", 10); // selects entries that have income > 10
@@ -71,8 +73,8 @@ for(DLCPP_LIST::iterator i = ret->begin(); i != ret->end(); ++i)
 To retrieve a single instance of data, it's better to use the .get() method. e.g.:
 
 ```c++
-models::Model* m;
-models::QuerySet* ret;
+ExampleModel* m;
+models::QuerySet<ExampleModel>* ret;
 
 m = new ExampleModel;
 ret = m->get("id__eq", 5);
@@ -89,8 +91,8 @@ ret["id"] // shall return 5
 To insert new data in a table, do as follows:
 
 ```c++
-models::Model* m;
-models::QuerySet* n;
+ExampleModel* m;
+models::QuerySet<ExampleModel>* n;
 
 m = new ExampleModel;
 n = m->insert();
@@ -101,13 +103,15 @@ n.set("id", 7);
 n.save();
 ```
 
+Note that, after the `save()` call, the QuerySet object is freed. Atempts to call its methods will only result in Segmentation Faults!
+
 ### UPDATE data
 
 To update data, you must retrieve it first:
 
 ```c++
-models::Model* m;
-models::QuerySet* n;
+ExampleModel* m;
+models::QuerySet<ExampleModel>* n;
 
 m = new ExampleModel;
 n = m->get("id__eq", 7);
@@ -122,8 +126,8 @@ n.save();
 Like an update, you must retrieve the data first:
 
 ```c++
-models::Model* m;
-models::QuerySet* n;
+ExampleModel* m;
+models::QuerySet<ExampleModel>* n;
 
 m = new ExampleModel;
 n = m->get("id__eq", 7);
