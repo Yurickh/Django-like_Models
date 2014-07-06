@@ -49,3 +49,26 @@ std::string models::getime()
 
 	return dt;
 }
+
+std::string models::tostring(int value)
+{
+	std::stringstream temp;
+
+	temp << value;
+
+	return temp.str();
+}
+
+std::string models::tostring(bool value)
+{
+	return (value)? "TRUE" : "FALSE";
+}
+
+std::string models::tostring(float value)
+{
+	std::stringstream temp;
+
+	temp << value;
+
+	return temp.str();
+}

@@ -22,12 +22,9 @@ int main()
 		Abacate* a = new Abacate;
 		models::QuerySet<Abacate>* q;
 
-		q = a->insert();
-		
-		q->set("coluna1", 2);
-		q->set("coluna2", 3);
+		q = a->get("coluna1__eq", 2);
 
-		q->save();
+		//cout << "RETURNED VALUE:" << q["coluna2"] << endl;
 
 		delete a;
 	}

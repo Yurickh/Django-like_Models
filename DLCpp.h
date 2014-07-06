@@ -28,6 +28,10 @@ extern "C" {
 
 namespace models
 {
+	std::string tostring(int value);
+	std::string tostring(float value);
+	std::string tostring(bool value);
+
 	template<class Derived>
     class QuerySet;
 
@@ -425,13 +429,19 @@ namespace models
         QuerySet* filter(std::stringstream requestr, float);
         QuerySet* filter(std::stringstream requestr, int);
 
-        QuerySet* get(std::stringstream requestr, bool);
-        QuerySet* get(std::stringstream requestr, std::string);
-        QuerySet* get(std::stringstream requestr, float);
-        QuerySet* get(std::stringstream requestr, int);
-*/
+        QuerySet* get(std::string requestr, bool);
+        QuerySet* get(std::string requestr, std::string);
+        QuerySet* get(std::string requestr, float);*/
+        QuerySet<Derived>* get(std::string requestr, int value);
+
         QuerySet<Derived>* insert(void);
     };
+
+///////////////////////// DEFINITIONS /////////////////////////////
+
+  /////////////////////
+ // Model			//
+/////////////////////
 
 	template<class Derived>
 	void Model<Derived>::retrieve(DLCPP_MAP(Field) &a, std::string &c)
@@ -549,6 +559,68 @@ namespace models
 		sql.append(" () VALUES ();");
 		return new QuerySet<Derived>(this, pk->first, sql );
 	}
+
+	template<class Derived>
+	QuerySet<Derived>* Model<Derived>::get(std::string requestr, int value)
+	{
+		std::list<std::string> rqlist;
+		std::list<std::string>::iterator it;
+		std::string token, temp;
+		size_t pos = 0;
+
+		std::stringstream SQLquery;
+
+		//EXPLODE STRING (__) INTO rqlist
+		while((pos = requestr.find("__")) != std::string::npos)
+		{
+			token = requestr.substr(0, pos);
+			rqlist.push_front(token);
+			requestr.erase(0, pos+2);
+		}
+		token = requestr.substr(0, requestr.size());
+		rqlist.push_front(token);
+		//END EXPLODE -> rqlist contains exploded string
+
+		SQLquery << "SELECT FROM " << ref << " WHERE ;";
+
+		token = rqlist.front(); // get type of access
+		rqlist.pop_front();
+
+		temp = SQLquery.str();
+		pos = temp.find("WHERE")+6;
+
+		temp.insert(pos, (token == "eq") ? "= " :
+						 (token == "gt") ? "> " :
+						 (token == "lt") ? "< " :
+						 (token == "ge") ? ">=" :
+						 (token == "le") ? "<=" :
+						 (token == "ne") ? "!=" :
+							"");
+
+		temp.insert(pos, rqlist.front());
+		pos += rqlist.front().size()+2;
+		rqlist.pop_front();
+
+		token = tostring(value);
+		temp.insert(pos, token);
+
+		pos = temp.find(" FROM");
+		temp.insert(pos, " * ");
+
+		pos = temp.find(" WHERE");
+
+		for(it=rqlist.begin(); it!=rqlist.end(); ++it)
+		{
+			temp.insert(pos, " NATURAL JOIN "); pos+=14;
+			temp.insert(pos, *it); pos+=it->size();
+		}
+
+		return new QuerySet<Derived>(this, pk->first, temp);
+	}
+
+  /////////////////////////
+ // QUERYSET			//
+/////////////////////////
 
 	template<class Derived>
 	void QuerySet<Derived>::set(std::string column, int content)
