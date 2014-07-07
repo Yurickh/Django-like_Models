@@ -18,14 +18,14 @@ DLCPP_NEW_MODEL(Abacate)
 int main()
 {
 	Abacate* a = new Abacate();
-    models::QuerySet<Abacate>* q;
+    models::MultipleSet<Abacate>* q;
 
-    q = a->insert();
+    q = a->filter("coluna2__eq", 4);
 
-    q->set("coluna1", "Yurick");
-    q->set("coluna2", 4);
+    q->front()["coluna2"] = 5;
 
     q->save();
 
+    delete a;
 	return 0;
 }

@@ -58,7 +58,7 @@ To retrieve a set of data, use the .filter() method. e.g.:
 ExampleModel* m;
 models::MultipleSet<ExampleModel>* ret;
 
-m = new ExampleModel;
+m = new ExampleModel; // connects to database
 ret = m->filter("income__gt", 10); // selects entries that have income > 10
 
 // in this case, returns a DLCPP_LIST, that consists of
@@ -67,6 +67,8 @@ ret = m->filter("income__gt", 10); // selects entries that have income > 10
 // Shall print the ID of all entries returned.
 for(DLCPP_LIST_ITER i = ret->begin(); i != ret->end(); ++i)
     cout << (*i)["id"];
+
+delete m; // disconnects from the database! remember to do it
 ```
 
 To retrieve a single instance of data, it's better to use the .get() method. e.g.:
@@ -83,6 +85,8 @@ ret = m->get("id__eq", 5);
 // defined by column_name => column_value.
 
 (*ret)["id"] // shall return 5
+
+delete m;
 ```
 
 ### INSERT data
@@ -106,7 +110,8 @@ Note that, after the `save()` call, the QuerySet object is freed. Atempts to cal
 
 ### UPDATE data
 
-To update data, you must retrieve it first:
+To update data, you must retrieve it first.
+Then, you're free to manipulate the QuerySet as you like (it works like a map while a SingleSet, and as a list of maps while a MultipleSet).
 
 ```c++
 ExampleModel* m;
